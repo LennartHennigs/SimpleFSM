@@ -1,0 +1,17 @@
+{
+	"name": "SimpleFSM",
+	"version": "1.0.0",
+	"keywords": "State Machine, FSM",
+	"description": "Arduino Library ",
+	"homepage": "https://github.com/LennartHennigs/Button2",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/LennartHennigs/Button2"
+	},
+	"authors": {
+		"name": "Lennart Hennigs",
+		"url": "https://lennarthennigs.de"
+	},
+	"frameworks": "arduino",
+	"platforms": "*"
+}

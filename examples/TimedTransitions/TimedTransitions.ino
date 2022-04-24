@@ -1,0 +1,52 @@
+/////////////////////////////////////////////////////////////////
+
+#include "SimpleFSM.h"
+
+/////////////////////////////////////////////////////////////////
+
+SimpleFSM fsm;
+
+/////////////////////////////////////////////////////////////////
+
+void on_red() {
+  Serial.println("State: RED");
+}
+ 
+void on_green() {
+  Serial.println("State: GREEN");
+}
+
+/////////////////////////////////////////////////////////////////
+
+State s[] = {
+  State("red",        on_red),
+  State("green",      on_green),
+};
+
+TimedTransition timedTransitions[] = {
+  TimedTransition(&s[0], &s[1], 6000),
+  TimedTransition(&s[1], &s[0], 4000),
+};
+
+/////////////////////////////////////////////////////////////////
+
+void setup() {
+  Serial.begin(9600);
+  while (!Serial) {
+    delay(300);
+  }
+  Serial.println();
+  Serial.println("SimpleFSM - Timed Transitions Only (Traffic Light)\n");
+    
+  fsm.add(timedTransitions, 2);
+  
+  fsm.setInitialState(&s[0]);
+}
+
+/////////////////////////////////////////////////////////////////
+
+void loop() {
+  fsm.run();
+}
+
+/////////////////////////////////////////////////////////////////
