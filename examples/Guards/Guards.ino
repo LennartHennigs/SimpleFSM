@@ -4,6 +4,9 @@
 
 /////////////////////////////////////////////////////////////////
 
+int countdown = 6;
+
+/////////////////////////////////////////////////////////////////
 
 void counting() {
   Serial.println(--countdown);
@@ -43,8 +46,6 @@ TimedTransition timedTransitions[] = {
   TimedTransition(&s[0], &s[1], 1000, NULL, "", zero_yet),
   TimedTransition(&s[0], &s[0], 1000, NULL, "", not_zero_yet)
 };
-
-int countdown = 6;
 
 /////////////////////////////////////////////////////////////////
 
