@@ -54,8 +54,7 @@ bool SimpleFSM::trigger(int event_id) {
     // Find the transition with the current state and given event.
     for (int i = 0; i < num_standard; i++) {
       if (transitions[i].from == current_state && transitions[i].event_id == event_id) {
-        _transitionTo(&(transitions[i]));
-        return true;
+        return _transitionTo(&(transitions[i]));
       }
     }
   }
