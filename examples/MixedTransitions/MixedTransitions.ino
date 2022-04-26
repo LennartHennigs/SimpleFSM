@@ -5,12 +5,6 @@
 
 /////////////////////////////////////////////////////////////////
 
-enum triggers {
-  button_was_pressed = 1  
-};
-
-/////////////////////////////////////////////////////////////////
-
 SimpleFSM fsm;
 Button2 btn;
 
@@ -30,16 +24,18 @@ void on_button_press() {
 
 /////////////////////////////////////////////////////////////////
 
-void button_handler(Button2 btn) {
-  fsm.trigger(button_was_pressed);
-}
-
-/////////////////////////////////////////////////////////////////
-
 State s[] = {
   State("red",        on_red),
   State("green",      on_green),
   State("BTN",        on_button_press)
+};
+
+enum triggers {
+  button_was_pressed = 1  
+};
+
+Transition transitions[] = {
+  Transition(&s[0], &s[2], button_was_pressed)
 };
 
 TimedTransition timedTransitions[] = {
@@ -48,9 +44,12 @@ TimedTransition timedTransitions[] = {
   TimedTransition(&s[2], &s[1], 2000)
 };
 
-Transition transitions[] = {
-  Transition(&s[0], &s[2], button_was_pressed)
-};
+
+/////////////////////////////////////////////////////////////////
+
+void button_handler(Button2 btn) {
+  fsm.trigger(button_was_pressed);
+}
 
 /////////////////////////////////////////////////////////////////
 
