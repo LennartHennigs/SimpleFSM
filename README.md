@@ -1,5 +1,4 @@
-SimpleFSM
-=========
+# SimpleFSM
 
 Arduino/ESP library to simplify setting up and running a state machinee.
 
@@ -7,67 +6,124 @@ Arduino/ESP library to simplify setting up and running a state machinee.
 * Copyright (C) 2022 Lennart Hennigs.
 * Released under the MIT license.
 
-Description
------------
+**Disclaimer**
+
+* This library is not complete (yet) and a work in progress. 
+* Some of the features mentioned below might not be done yet.
+* This document is also not complete
+
+## Description
 
 * This library allows you to quickly setup a State Machine.
+* Read here [what a state machine is]() and [why a state mache is neat for hardware projects]() TBD
 
-* It is heavily inspiried by the [Arduino-fsm](https://github.com/jonblack/arduino-fsm) library created by [Jon Black](https://github.com/jonblack). I also used some of its code as a base for this library. Without his work this library would not exist.
+### Features
 
-__Features__
-
+* Easy state definition
+* Allows for none, one or multiple final states
 * Event triggered transitions and (automatic) timed transitions
 * Possibility to define guard conditions for your transitions
-* Definition of and initial state and multiple final states
 * Callback functions for...
   * State entry, staying, exit
-  * Transition entry
+  * Transition execution
   * Final state reached
-  * run interval of the State Machine
-* Creation of a `Graphviz` source file of your state machine definition
+  * the run interval of the state machine
+* Definition of an in_state intervall
+* Functions for tracking the behaviour and progress of the state machine (TBD)
+* Storage of the current state on files with `LittleFS` or SD card storage (TBD)
+* Creation of a `Graphviz` source file of your state machine definition (TBD)
   
 To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/master/CHANGELOG.md).
 
-How To Use
-==========
+## How To Use
 
 * You first need to define a set of states for your state machine
-* Then, define regular or (automatic) timed transitions
-* And finally pass the transitions to you state machine
-* ...and let it run in your loop
-* See [SimpleFSMBasic.ino]() for a basic examnple
+* Then, define transitions (regular or timed) for these state
+* Pass the transitions to your state machine
+* Define an inital state
+* ...and add the `run()` function in your loop
+* See [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino) for a basic example
 
-__Defining States__
-...
+### Defining States
 
-__Transisions__
-...
+* A finite state machine has a defined set of states
+* A state must have a name
+* ...and can have callback functions for different events (when a state is entered, exited, or stays in a state)
+* The inital state **must** of the state machine must be defined – either via the constructor or the `setup()` function or via the `setInitialState()` function
+* None, one, or multiple states can be defined as an end state via `setAsFinal()`
+* The easiest way to define states is creating using an array
+* This definition is taken from [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitions/SimpleTransitions.ino)
+  ```
+  State s[] = {
+    State("red",        on_red),
+    State("green",      on_green),
+    State("BTN",        on_button_press)
+  };
+  ```
 
-__Guard Conditions__
-...
+* For the `State` class definition see [State.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/State.h)
 
-__Helper functions__
-...
+### Transisions
 
-Class Definition
-----------------
+* This library offers two types of Transitions, regular and timed ones
+* Regular transitions need to be manually triggered, e.g. through a button press
+* Timed transitions are automatically executed after a certain amount of time
+* Transitions must have a from and and a to state
+* Regular transitions must have a trigger (ID) and timed transitions an interval
+* Transitions can have a callback function for when the transition is executed, a name, and a [guard condition](#guard-conditions)
+* See [Transitions.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/Transitions.h) for the class definition of both transitions
+* Note: Both classes are based of an abstract class which is not to be used in your code
+* You can add both types to a state machine, see [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino) for an example
 
-Examples
-========
+### Regular Transitions
 
-Notes
-=====
+* ...
+* See [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitions/SimpleTransitions.ino) and [SimpleTransitionWithButtons.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitionWithButton/SimpleTransitionWithButton.ino)
 
-- To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/master/CHANGELOG.md).
+### Timed Transitions 
 
+* ...
+* See [TimedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/TimedTransitions/TimedTransitions.ino)
+
+### Guard Conditions
+
+* ...
+* See [Guards.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/Guards/Guards.ino)
+
+### In-State Interval
+
+* ...
+
+### Helper functions
+
+* ...
+
+## Class Definition
+
+* [State.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/State.h)
+* [Transitions.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/Transitions.h) for the class definition of both transitions
+* [SimpleFSM](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/SimpleFSM.h)
+
+## Examples
+
+* [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitions/SimpleTransitions.ino) - only regular transitions and showcasing the different events
+* [SimpleTransitionWithButtons.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitionWithButton/SimpleTransitionWithButton.ino) - event is now triggered via a hardware button
+* [TimedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/TimedTransitions/TimedTransitions.ino) - showcasing timed transitions
+* [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino) - regular and timed transitions
+* [Guards.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/Guards/Guards.ino) - showing how to define guard functions
+
+## Notes
+
+* This libary is heavily inspiried by the [Arduino-fsm](https://github.com/jonblack/arduino-fsm) library created by [Jon Black](https://github.com/jonblack). I initally used some of his as a base. Without Jon's work this library would not exist.
+* To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/master/CHANGELOG.md).
 * And if you find this library helpful, please consider giving it a star at [GitHub](https://github.com/LennartHennigs/SimpleFSM). Thanks!
 
-------------
+## How To Install
+
 Open the Arduino IDE choose "Sketch > Include Library" and search for "SimpleFSM".
 Or download the ZIP archive (<https://github.com/lennarthennigs/SimpleFSM/zipball/master>), and choose "Sketch > Include Library > Add .ZIP Library..." and select the downloaded file.
 
-License
--------
+## License
 
 MIT License
 
