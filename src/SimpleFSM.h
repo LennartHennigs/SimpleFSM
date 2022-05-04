@@ -41,7 +41,7 @@ class SimpleFSM {
     State* getState() const;
     State* getPreviousState() const;
     bool isInState(State* state) const;
-    int getTimeSinceTranisition() const;
+    int getTimeSinceTransition() const;
 
   protected:
     int num_timed = 0;
