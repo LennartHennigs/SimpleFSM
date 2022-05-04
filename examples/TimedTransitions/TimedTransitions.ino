@@ -29,6 +29,8 @@ TimedTransition timedTransitions[] = {
   TimedTransition(&s[1], &s[0], 4000),
 };
 
+int num_timed = sizeof(timedTransitions) / sizeof(TimedTransition);
+
 /////////////////////////////////////////////////////////////////
 
 void setup() {
@@ -39,7 +41,7 @@ void setup() {
   Serial.println();
   Serial.println("SimpleFSM - Timed Transition (Simple traffic light)\n");
     
-  fsm.add(timedTransitions, 2);
+  fsm.add(timedTransitions, num_timed);
   fsm.setInitialState(&s[0]);
 }
 
