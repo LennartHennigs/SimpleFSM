@@ -1,7 +1,11 @@
 /////////////////////////////////////////////////////////////////
 
 #include "SimpleFSM.h"
-#include "Button2.h"
+#include "Button2.h"    // https://github.com/LennartHennigs/Button2
+
+/////////////////////////////////////////////////////////////////
+
+#define BUTTON_PIN  D4
 
 /////////////////////////////////////////////////////////////////
 
@@ -44,6 +48,8 @@ TimedTransition timedTransitions[] = {
   TimedTransition(&s[2], &s[1], 2000)
 };
 
+int num_transitions = sizeof(transitions) / sizeof(Transition);
+int num_timed = sizeof(timedTransitions) / sizeof(TimedTransition);
 
 /////////////////////////////////////////////////////////////////
 
@@ -59,14 +65,15 @@ void setup() {
     delay(300);
   }
   Serial.println();
+  Serial.println();
   Serial.println("SimpleFSM - Mixed Transition (Traffic light with button for green)\n");
     
-  fsm.add(timedTransitions, 3);
-  fsm.add(transitions, 1);
+  fsm.add(timedTransitions, num_timed);
+  fsm.add(transitions, num_transitions);
   
   fsm.setInitialState(&s[0]);
 
-  btn.begin(D4);
+  btn.begin(BUTTON_PIN);
   btn.setTapHandler(button_handler);  
 }
 
