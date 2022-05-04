@@ -111,7 +111,7 @@ void SimpleFSM::setFinishedHandler(CallbackFunction f) {
 
 /////////////////////////////////////////////////////////////////
 
-int SimpleFSM::getTimeSinceTranisition() const {
+int SimpleFSM::getTimeSinceTransition() const {
   return (last_transition == -1) ? -1 : millis() - last_transition;
 }
 
@@ -141,6 +141,7 @@ void  SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NU
     if (!is_initialized) {
       is_initialized = true;
       if (current_state->on_enter != NULL) current_state->on_enter();
+      last_transition = now;
     }
     // are we done yet?
     if (!current_state->is_final) {  
