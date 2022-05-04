@@ -60,7 +60,6 @@ To see the latest changes to the library please take a look at the [Changelog](h
     State("BTN",        on_button_press)
   };
   ```
-
 * For the `State` class definition see [State.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/State.h)
 
 ### Transisions
