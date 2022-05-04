@@ -67,8 +67,10 @@ To see the latest changes to the library please take a look at the [Changelog](h
 * This library offers two types of Transitions, regular and timed ones
 * All transitions must have a from and and a to state
 * Transitions can have a callback function for when the transition is executed, a name, and a [guard condition](#guard-conditions)
-* See [Transitions.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/Transitions.h) for the class definition of both transitiond. (Note: Both classes are based of an abstract class which is not to be used in your code.)
 * You can add both types to a state machine, see [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino) for an example
+* See [Transitions.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/Transitions.h) for the class definitions of `Transition` and `TimedTransition`. 
+* Note: Both classes are based of an abstract class which is not to be used in your code.
+
 
 ### Regular Transitions
 * Regular transitions need to be manually triggered, e.g. through a button press:
@@ -85,7 +87,7 @@ To see the latest changes to the library please take a look at the [Changelog](h
   };
   ```
 
-* See [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitions/SimpleTransitions.ino) and [SimpleTransitionWithButtons.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitionWithButton/SimpleTransitionWithButton.ino)
+* See [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitions/SimpleTransitions.ino) and [SimpleTransitionWithButtons.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitionWithButton/SimpleTransitionWithButton.ino) for more details
 
 ### Timed Transitions 
  
@@ -98,7 +100,7 @@ To see the latest changes to the library please take a look at the [Changelog](h
     TimedTransition(&s[2], &s[1], 2000)
   };
   ```
-* See [TimedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/TimedTransitions/TimedTransitions.ino)
+* See [TimedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/TimedTransitions/TimedTransitions.ino) for more details
 
 ### Guard Conditions
 
