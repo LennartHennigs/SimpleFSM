@@ -41,7 +41,7 @@ class SimpleFSM {
     State* getState() const;
     State* getPreviousState() const;
     bool isInState(State* state) const;
-    int getTimeSinceTransition() const;
+    int lastTransitionedAt() const;
 
   protected:
     int num_timed = 0;
@@ -50,19 +50,21 @@ class SimpleFSM {
     TimedTransition* timed = NULL;
 
     bool is_initialized = false;
-    String dot_definition = "";
-    State* inital_state = NULL;
-    State* current_state = NULL;
-    State* prev_state = NULL;
-    CallbackFunction on_transition = NULL;
-    CallbackFunction finished_cb = NULL;
     unsigned long last_run = 0;
     unsigned long last_transition = -1;
 
-    bool _transitionTo(AbstractTransition* transition);
-    bool _changeToState(State* s, unsigned long now);
+    State* inital_state = NULL;
+    State* current_state = NULL;
+    State* prev_state = NULL;
+    CallbackFunction on_transition_cb = NULL;
+    CallbackFunction finished_cb = NULL;
+
+    String dot_definition = "";
+
     bool _initFSM();
-};
+};  bool _transitionTo(AbstractTransition* transition);
+    bool _changeToState(State* s, unsigned long now);
+  
 
 /////////////////////////////////////////////////////////////////
 #endif

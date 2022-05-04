@@ -9,7 +9,7 @@ SimpleFSM::SimpleFSM() :
   num_timed(0),
   last_run(0),
   is_initialized(false),
-  on_transition(NULL),
+  on_transition_cb(NULL),
   finished_cb(NULL),
   inital_state(NULL),
   current_state(NULL)
@@ -80,7 +80,7 @@ bool SimpleFSM::isInState(State* t) const {
 /////////////////////////////////////////////////////////////////
 
 void SimpleFSM::setTransitionHandler(CallbackFunction f) {
-  on_transition = f;
+  on_transition_cb = f;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -108,7 +108,7 @@ void SimpleFSM::setFinishedHandler(CallbackFunction f) {
 
 /////////////////////////////////////////////////////////////////
 
-int SimpleFSM::getTimeSinceTransition() const {
+int SimpleFSM::lastTransitionedAt() const {
   return (last_transition == -1) ? -1 : millis() - last_transition;
 }
 
@@ -134,7 +134,7 @@ void SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NUL
   unsigned long now = millis();
   // is the machine set up?
   if (!is_initialized) _initFSM();
-  // are we ok=
+  // are we ok?
   if (current_state != NULL) {
     if (now >= last_run + interval) {
       last_run = now;
@@ -213,7 +213,7 @@ bool SimpleFSM::_transitionTo(AbstractTransition* transition) {
   }
   if (transition->from->on_exit != NULL) transition->from->on_exit();      
   if (transition->on_run_cb != NULL) transition->on_run_cb();
-  if (on_transition != NULL) on_transition();
+  if (on_transition_cb != NULL) on_transition_cb();
   
   return _changeToState(transition->to, now);
 }
