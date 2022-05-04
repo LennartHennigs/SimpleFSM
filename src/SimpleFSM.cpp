@@ -4,7 +4,7 @@
 
 SimpleFSM::SimpleFSM() : 
   transitions(NULL),
-  timed_transitions(NULL),
+  timed(NULL),
   num_standard(0),
   num_timed(0),
   last_run(0),
@@ -26,9 +26,9 @@ SimpleFSM::SimpleFSM(State* initial_state) {
 
 SimpleFSM::~SimpleFSM() {
   free(transitions);
-  free(timed_transitions);
+  free(timed);
   transitions = NULL;
-  timed_transitions = NULL;
+  timed = NULL;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -115,9 +115,9 @@ int SimpleFSM::getTimeSinceTransition() const {
 /////////////////////////////////////////////////////////////////
 
 bool SimpleFSM::add(TimedTransition t[], int size) {
-  timed_transitions = (TimedTransition*) realloc(timed_transitions, (num_timed + size) * sizeof(TimedTransition));
+  timed = (TimedTransition*) realloc(timed, (num_timed + size) * sizeof(TimedTransition));
   for (int i=0; i < size; i++) {
-    timed_transitions[num_timed + i] = t[i];
+    timed[num_timed + i] = t[i];
   }
   num_timed = num_timed + size;
 /*
@@ -146,14 +146,14 @@ void SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NUL
         // go through the timed events
         for (int i = 0; i < num_timed; i++) {
           // am I in the right state
-          if (timed_transitions[i].from == current_state) {
+          if (timed[i].from == current_state) {
             // need to reset timer of transition?
-            if (timed_transitions[i].start == 0) {
-              timed_transitions[i].start = now;
+            if (timed[i].start == 0) {
+              timed[i].start = now;
             // reached the interval?
-            } else if (now - timed_transitions[i].start >= timed_transitions[i].interval) {
-              if (_transitionTo(&timed_transitions[i])) {
-                timed_transitions[i].start = 0;
+            } else if (now - timed[i].start >= timed[i].interval) {
+              if (_transitionTo(&timed[i])) {
+                timed[i].start = 0;
                 return;
               }
             }

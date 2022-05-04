@@ -47,7 +47,7 @@ class SimpleFSM {
     int num_timed = 0;
     int num_standard = 0;
     Transition* transitions = NULL;
-    TimedTransition* timed_transitions = NULL;
+    TimedTransition* timed = NULL;
 
     bool is_initialized = false;
     String dot_definition = "";
