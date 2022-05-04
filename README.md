@@ -47,12 +47,10 @@ To see the latest changes to the library please take a look at the [Changelog](h
 ### Defining States
 
 * A finite state machine has a defined set of states
-* A state must have a name
+* A state must have a name...
 * ...and can have callback functions for different events (when a state is entered, exited, or stays in a state)
-* The inital state **must** of the state machine must be defined – either via the constructor or the `setup()` function or via the `setInitialState()` function
-* None, one, or multiple states can be defined as an end state via `setAsFinal()`
-* The easiest way to define states is creating using an array
-* This definition is taken from [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitions/SimpleTransitions.ino)
+* Most states will have the entry handler
+* The easiest way to define states is creating using an array, e.g. as shown in [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino):
   ```
   State s[] = {
     State("red",        on_red),
@@ -60,28 +58,46 @@ To see the latest changes to the library please take a look at the [Changelog](h
     State("BTN",        on_button_press)
   };
   ```
-* For the `State` class definition see [State.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/State.h)
+* The inital state **must** of the state machine must be defined – either via the constructor or the `setup()` function or via the `setInitialState()` function
+* None, one, or multiple states can be defined as an end state via `setAsFinal()`
+* For the full `State` class definition see [State.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/State.h)
 
-### Transisions
+### Transitions
 
 * This library offers two types of Transitions, regular and timed ones
-* Regular transitions need to be manually triggered, e.g. through a button press
-* Timed transitions are automatically executed after a certain amount of time
-* Transitions must have a from and and a to state
-* Regular transitions must have a trigger (ID) and timed transitions an interval
+* All transitions must have a from and and a to state
 * Transitions can have a callback function for when the transition is executed, a name, and a [guard condition](#guard-conditions)
-* See [Transitions.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/Transitions.h) for the class definition of both transitions
-* Note: Both classes are based of an abstract class which is not to be used in your code
+* See [Transitions.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/Transitions.h) for the class definition of both transitiond. (Note: Both classes are based of an abstract class which is not to be used in your code.)
 * You can add both types to a state machine, see [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino) for an example
 
 ### Regular Transitions
+* Regular transitions need to be manually triggered, e.g. through a button press:
+  ```
+  Transition transitions[] = {
+    Transition(&s[0], &s[2], button_was_pressed)
+  };
+  ```
+* Regular transitions must have a trigger (ID), above this is `button_was_pressed`
+* It's easy to define triggeres in an enum:
+  ```
+  enum triggers {
+    button_was_pressed = 1  
+  };
+  ```
 
-* ...
 * See [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitions/SimpleTransitions.ino) and [SimpleTransitionWithButtons.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitionWithButton/SimpleTransitionWithButton.ino)
 
 ### Timed Transitions 
-
-* ...
+ 
+* Timed transitions are automatically executed after a certain amount of time
+* The interval is defined in milliseconds
+  ```
+  TimedTransition timedTransitions[] = {
+    TimedTransition(&s[0], &s[1], 6000),
+    TimedTransition(&s[1], &s[0], 4000),
+    TimedTransition(&s[2], &s[1], 2000)
+  };
+  ```
 * See [TimedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/TimedTransitions/TimedTransitions.ino)
 
 ### Guard Conditions
