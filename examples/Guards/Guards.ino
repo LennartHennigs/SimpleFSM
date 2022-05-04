@@ -47,6 +47,8 @@ TimedTransition timedTransitions[] = {
   TimedTransition(&s[0], &s[0], 1000, NULL, "", not_zero_yet)
 };
 
+int num_timed = sizeof(timedTransitions) / sizeof(TimedTransition);
+
 /////////////////////////////////////////////////////////////////
 
 void setup() {
@@ -57,7 +59,7 @@ void setup() {
   Serial.println();
   Serial.println("SimpleFSM - Using Guard Condition (Time Bomb)\n");
     
-  fsm.add(timedTransitions, 2);
+  fsm.add(timedTransitions, num_timed);
   // initial state  
   fsm.setInitialState(&s[0]);
     // final state    
