@@ -43,22 +43,19 @@ void SimpleFSM::reset() {
 
 void SimpleFSM::setInitialState(State* state) {
   inital_state = state;
-  current_state = state;
 //  m_dot_definition = create_dot_inital_state(state->name);
 }
 
 /////////////////////////////////////////////////////////////////
 
 bool SimpleFSM::trigger(int event_id) {
-  if (is_initialized) {
-    // Find the transition with the current state and given event.
-    for (int i = 0; i < num_standard; i++) {
-      if (transitions[i].from == current_state && transitions[i].event_id == event_id) {
-        return _transitionTo(&(transitions[i]));
-      }
+  if (!is_initialized) _initFSM();
+  // Find the transition with the current state and given event.
+  for (int i = 0; i < num_standard; i++) {
+    if (transitions[i].from == current_state && transitions[i].event_id == event_id) {
+      return _transitionTo(&(transitions[i]));
     }
   }
-  return false;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -133,42 +130,73 @@ bool SimpleFSM::add(TimedTransition t[], int size) {
 
 /////////////////////////////////////////////////////////////////
 
-void  SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NULL */) {
+void SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NULL */) {
   unsigned long now = millis();
-  if (now >= last_run + interval) {
-    last_run = now;
-    // is the machine set up?
-    if (!is_initialized) {
-      is_initialized = true;
-      if (current_state->on_enter != NULL) current_state->on_enter();
-      last_transition = now;
-    }
-    // are we done yet?
-    if (!current_state->is_final) {  
-      // trigger the on_state event
-      if (current_state->on_state != NULL) current_state->on_state();
+  // is the machine set up?
+  if (!is_initialized) _initFSM();
+  // are we ok=
+  if (current_state != NULL) {
+    if (now >= last_run + interval) {
+      last_run = now;
+      // are we done yet?
+      if (!current_state->is_final) {  
+        // trigger the on_state event
+        if (current_state->on_state != NULL) current_state->on_state();
 
-      // go through the timed events
-      for (int i = 0; i < num_timed; i++) {
-        TimedTransition* transition = &timed_transitions[i];
-        // am I in the right state
-        if (transition->from == current_state) {
-          // need to reset timer of transition?
-          if (transition->start == 0) {
-            transition->start = now;
-          // reached the interval?
-          } else if (now - transition->start >= transition->interval) {
-            if (_transitionTo(transition)) {
-              transition->start = 0;
-              return;
+        // go through the timed events
+        for (int i = 0; i < num_timed; i++) {
+          // am I in the right state
+          if (timed_transitions[i].from == current_state) {
+            // need to reset timer of transition?
+            if (timed_transitions[i].start == 0) {
+              timed_transitions[i].start = now;
+            // reached the interval?
+            } else if (now - timed_transitions[i].start >= timed_transitions[i].interval) {
+              if (_transitionTo(&timed_transitions[i])) {
+                timed_transitions[i].start = 0;
+                return;
+              }
             }
           }
         }
+        // trigger the regular tick event
+        if (tick_cb != NULL) tick_cb();
       }
-      // trigger the regular tick event
-      if (tick_cb != NULL) tick_cb();
-
     }
+  }
+}
+
+/////////////////////////////////////////////////////////////////
+
+bool SimpleFSM::_initFSM() {
+  unsigned long now = millis();
+  // do we need to do this?
+  if (!is_initialized) {
+    is_initialized = true;
+    // is the inital state set?
+    if (inital_state != NULL) {
+      return _changeToState(inital_state, now);
+    } else {
+      return false;
+    }
+  }
+}
+
+/////////////////////////////////////////////////////////////////
+
+bool SimpleFSM::_changeToState(State* s, unsigned long now) {
+  if (s != NULL) {
+    prev_state = current_state;
+    current_state = s;
+    if (s->on_enter != NULL) s->on_enter();
+    last_run = now;
+    // to make it accessible within on_enter
+    last_transition = now;
+    // is this the end?
+    if (s->is_final && finished_cb != NULL) finished_cb();
+    return true;
+  } else {
+    return false;
   }
 }
 
@@ -186,15 +214,8 @@ bool SimpleFSM::_transitionTo(AbstractTransition* transition) {
   if (transition->from->on_exit != NULL) transition->from->on_exit();      
   if (transition->on_run_cb != NULL) transition->on_run_cb();
   if (on_transition != NULL) on_transition();
-  prev_state = current_state;
-  current_state = transition->to;
-  if (transition->to->on_enter != NULL) transition->to->on_enter();
-  last_run = now;
-  // to make it accessible within on_enter
-  last_transition = now;
-  // is this the end?
-  if (current_state->is_final && finished_cb != NULL) finished_cb();
-  return true;
+  
+  return _changeToState(transition->to, now);
 }
 
 /////////////////////////////////////////////////////////////////

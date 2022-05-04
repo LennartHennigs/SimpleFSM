@@ -60,7 +60,8 @@ class SimpleFSM {
     unsigned long last_transition = -1;
 
     bool _transitionTo(AbstractTransition* transition);
-
+    bool _changeToState(State* s, unsigned long now);
+    bool _initFSM();
 };
 
 /////////////////////////////////////////////////////////////////
