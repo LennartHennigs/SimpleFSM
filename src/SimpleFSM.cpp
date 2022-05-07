@@ -116,7 +116,7 @@ void SimpleFSM::setFinishedHandler(CallbackFunction f) {
 
 /////////////////////////////////////////////////////////////////
 
-int SimpleFSM::lastTransitionedAt() const {
+unsigned long SimpleFSM::lastTransitioned() const {
   return (last_transition == -1) ? -1 : millis() - last_transition;
 }
 

@@ -42,7 +42,7 @@ class SimpleFSM {
     State* getState() const;
     bool isInState(State* state) const;
     State* getPreviousState() const;
-    int lastTransitionedAt() const;
+    unsigned long lastTransitioned() const;
     String getDotDefinition();
 
     
