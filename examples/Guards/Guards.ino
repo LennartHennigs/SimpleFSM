@@ -6,10 +6,12 @@
 
 int countdown = 6;
 
+SimpleFSM fsm;
+
 /////////////////////////////////////////////////////////////////
 
 void counting() {
-  Serial.println(--countdown);
+  Serial.println(countdown--);
 }
 
 void boom() {
@@ -34,8 +36,6 @@ void tick() {
 
 
 /////////////////////////////////////////////////////////////////
-
-SimpleFSM fsm;
 
 State s[] = {
   State("counting",   counting),
