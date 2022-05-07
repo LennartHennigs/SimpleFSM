@@ -29,9 +29,9 @@ void on_button_press() {
 /////////////////////////////////////////////////////////////////
 
 State s[] = {
-  State("red",        on_red),
-  State("green",      on_green),
-  State("BTN",        on_button_press)
+  State("red light",          on_red),
+  State("green light",        on_green),
+  State("button pressed", on_button_press)
 };
 
 enum triggers {
@@ -74,7 +74,7 @@ void setup() {
   fsm.setInitialState(&s[0]);
 
   btn.begin(BUTTON_PIN);
-  btn.setTapHandler(button_handler);  
+  btn.setTapHandler(button_handler); 
 }
 
 /////////////////////////////////////////////////////////////////
