@@ -102,7 +102,9 @@ void showGraph() {
   message += F("<title>GraphVizArt</title>\n");
   message += F("</head>\n");
   message += F("<body>\n");
-  message += F("<a href='http://gravizo.com/'><img src='https://g.gravizo.com/svg?") + fsm.getDotDefinition() + F("'/></a>");
+  message += F("<a href='http://gravizo.com/'><img src='https://g.gravizo.com/svg?");
+  message += fsm.getDotDefinition();
+  message += F("'/></a>");
   message += F("</body>\n");
   message += F("</html>\n");
   server.send ( 200, F("text/html"), message);
