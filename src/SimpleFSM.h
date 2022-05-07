@@ -38,11 +38,14 @@ class SimpleFSM {
     void run(int interval = 1000, CallbackFunction tick_cb = NULL);
     void reset();
 
+    bool isFinished() const;
     State* getState() const;
-    State* getPreviousState() const;
     bool isInState(State* state) const;
+    State* getPreviousState() const;
     int lastTransitionedAt() const;
+    String getDotDefinition();
 
+    
   protected:
     int num_timed = 0;
     int num_standard = 0;
@@ -50,6 +53,7 @@ class SimpleFSM {
     TimedTransition* timed = NULL;
 
     bool is_initialized = false;
+    bool is_finished = false;
     unsigned long last_run = 0;
     unsigned long last_transition = -1;
 
@@ -62,9 +66,16 @@ class SimpleFSM {
     String dot_definition = "";
 
     bool _initFSM();
-};  bool _transitionTo(AbstractTransition* transition);
+    bool _transitionTo(AbstractTransition* transition);
     bool _changeToState(State* s, unsigned long now);
-  
+
+    void _addDotTransition(Transition& t);
+    void _addDotTransition(TimedTransition& t);
+    String _dot_transition(String from, String to, String label, String param);
+    String _dot_inital_state();
+    String _dot_header();
+    String _dot_active_node();
+};  
 
 /////////////////////////////////////////////////////////////////
 #endif

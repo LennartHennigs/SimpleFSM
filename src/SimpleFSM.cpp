@@ -12,6 +12,7 @@ SimpleFSM::SimpleFSM() :
   on_transition_cb(NULL),
   finished_cb(NULL),
   inital_state(NULL),
+  dot_definition(""),
   current_state(NULL)
 {}
 
@@ -43,8 +44,7 @@ void SimpleFSM::reset() {
 
 void SimpleFSM::setInitialState(State* state) {
   inital_state = state;
-//  m_dot_definition = create_dot_inital_state(state->name);
-}
+  }
 
 /////////////////////////////////////////////////////////////////
 
@@ -89,15 +89,23 @@ bool SimpleFSM::add(Transition t[], int size) {
   transitions = (Transition*) realloc(transitions, (num_standard + size) * sizeof(Transition));
   for (int i=0; i < size; i++) {
     transitions[num_standard + i] = t[i];
-/*
-    m_dot_definition = m_dot_definition +
-      create_dot_transition(t[i]->from->name, t[i]->to->name, name, "ID=" + String(t[i]->event_id));
-*/
+    _addDotTransition(t[i]);
   }
   num_standard = num_standard + size;
-/*
-*/    
   return true;
+}
+
+/////////////////////////////////////////////////////////////////
+
+bool SimpleFSM::add(TimedTransition t[], int size) {
+  timed = (TimedTransition*) realloc(timed, (num_timed + size) * sizeof(TimedTransition));
+  for (int i=0; i < size; i++) {
+    timed[num_timed + i] = t[i];
+    _addDotTransition(t[i]);
+  }
+  num_timed = num_timed + size;
+  return true;
+
 }
 
 /////////////////////////////////////////////////////////////////
@@ -114,18 +122,8 @@ int SimpleFSM::lastTransitionedAt() const {
 
 /////////////////////////////////////////////////////////////////
 
-bool SimpleFSM::add(TimedTransition t[], int size) {
-  timed = (TimedTransition*) realloc(timed, (num_timed + size) * sizeof(TimedTransition));
-  for (int i=0; i < size; i++) {
-    timed[num_timed + i] = t[i];
-  }
-  num_timed = num_timed + size;
-/*
-  m_dot_definition =
-    m_dot_definition +
-    create_dot_transition(state_from->name, state_to->name, name, String(interval) + "ms");
-*/    
-  return true;
+bool SimpleFSM::isFinished() const {
+  return is_finished;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -139,7 +137,7 @@ void SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NUL
     if (now >= last_run + interval) {
       last_run = now;
       // are we done yet?
-      if (!current_state->is_final) {  
+      if (!is_finished) {
         // trigger the on_state event
         if (current_state->on_state != NULL) current_state->on_state();
 
@@ -194,6 +192,7 @@ bool SimpleFSM::_changeToState(State* s, unsigned long now) {
     last_transition = now;
     // is this the end?
     if (s->is_final && finished_cb != NULL) finished_cb();
+    if (s->is_final) is_finished = true;
     return true;
   } else {
     return false;
@@ -216,6 +215,48 @@ bool SimpleFSM::_transitionTo(AbstractTransition* transition) {
   if (on_transition_cb != NULL) on_transition_cb();
   
   return _changeToState(transition->to, now);
+}
+
+/////////////////////////////////////////////////////////////////
+
+String SimpleFSM::getDotDefinition() {
+  return "digraph G {\n" + _dot_header() + dot_definition + _dot_inital_state() + _dot_active_node() + "}\n";
+}
+
+/////////////////////////////////////////////////////////////////
+
+String SimpleFSM::_dot_transition(String from, String to, String label, String param) {
+  return "\t\"" + from + "\" -> \"" + to + "\"" +  " [label=\"" + label + " (" + param + ")\"];\n";
+}
+
+/////////////////////////////////////////////////////////////////
+
+String SimpleFSM::_dot_inital_state() {
+  return inital_state ? "\t\"" + inital_state->getName() + "\" [style=filled fontcolor=white fillcolor=black];\n\n" : "";
+}
+
+/////////////////////////////////////////////////////////////////
+
+String SimpleFSM::_dot_active_node() {
+  return current_state ? "\t\"" + current_state->getName() + "\" [style=filled fontcolor=white];\n" : "";
+}
+
+/////////////////////////////////////////////////////////////////
+
+String SimpleFSM::_dot_header() {
+  return "\trankdir=LR; pad=0.5\n\tnode [shape=circle fixedsize=true width=1.5];\n";
+}
+
+/////////////////////////////////////////////////////////////////
+
+void SimpleFSM::_addDotTransition(Transition& t) {
+  dot_definition = dot_definition + _dot_transition(t.from->getName(), t.to->getName(), t.getName(), "ID=" + String(t.event_id));
+}
+
+/////////////////////////////////////////////////////////////////
+
+void SimpleFSM::_addDotTransition(TimedTransition& t) {
+  dot_definition = dot_definition + _dot_transition(t.from->getName(), t.to->getName(), t.getName(), String(t.getInterval()) + "ms");
 }
 
 /////////////////////////////////////////////////////////////////
