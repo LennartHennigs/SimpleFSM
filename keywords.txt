@@ -14,10 +14,12 @@ reset	KEYWORD2
 getState	KEYWORD2
 getPreviousState	KEYWORD2
 isInState	KEYWORD2
-getTimeSinceTranisition	KEYWORD2
+isFinished	KEYWORD2
+lastTransitioned	KEYWORD2
 getID	KEYWORD2
 getName	KEYWORD2
 setName	KEYWORD2
+getDotDefinition	KEYWORD2
 setOnRunHandler	KEYWORD2
 setGuardCondition	KEYWORD2
 getEventID	KEYWORD2
