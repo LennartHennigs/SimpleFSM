@@ -91,7 +91,6 @@ void button_handler(Button2 btn) {
   fsm.trigger(button_was_pressed);
 }
 
-
 /////////////////////////////////////////////////////////////////
 
 void showGraph() {
