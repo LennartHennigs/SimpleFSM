@@ -220,7 +220,7 @@ bool SimpleFSM::_transitionTo(AbstractTransition* transition) {
 /////////////////////////////////////////////////////////////////
 
 String SimpleFSM::getDotDefinition() {
-  return "digraph G {\n" + _dot_header() + dot_definition + _dot_inital_state() + _dot_active_node() + "}\n";
+  return "digraph G {\n" + _dot_header() + dot_definition + _dot_active_node() + _dot_inital_state() + "}\n";
 }
 
 /////////////////////////////////////////////////////////////////
