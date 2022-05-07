@@ -29,9 +29,9 @@ Arduino/ESP library to simplify setting up and running a state machinee.
   * Final state reached
   * the run interval of the state machine
 * Definition of an in_state intervall
-* Functions for tracking the behaviour and progress of the state machine (TBD)
-* Storage of the current state on files with `LittleFS` or SD card storage (TBD)
-* Creation of a `Graphviz` source file of your state machine definition (TBD)
+* Functions for tracking the behaviour and progress of the state machine
+* Creation of a `Graphviz` source file of your state machine definition
+* TBD: Storage of the current state on files with `LittleFS` or SD card storage (TBD)
   
 To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/master/CHANGELOG.md).
 
@@ -171,7 +171,27 @@ To see the latest changes to the library please take a look at the [Changelog](h
 
 ### GraphViz Generation
 
-* ...
+* Use the function `getDotDefinition()` to get your state machine definition in the GraphViz [dot format](https://www.graphviz.org/doc/info/lang.html)
+* Here the output for the [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino) example:
+  
+  ```c++
+    digraph G {
+      rankdir=LR; pad=0.5
+      node [shape=circle fixedsize=true width=1.5];
+      "red light" -> "green light" [label=" (6000ms)"];
+      "green light" -> "red light" [label=" (4000ms)"];
+      "button pressed" -> "green light" [label=" (2000ms)"];
+      "red light" -> "button pressed" [label=" (ID=1)"];
+      "red light" [style=filled fontcolor=white fillcolor=black];
+    }
+  ```
+
+* You can use this visualize your state machine:\
+  ![MixedTransitions.ino example](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.svg?raw=true)
+
+* If the machine is running, the current state will be highlighted
+* See [MixedTransitionsBrowser.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitionsBrowser/MixedTransitionsBrowser.ino) to learn how to run a webserver to show the Graphviz diagram of your state machine
+
 
 ## Class Definitions
 
@@ -185,6 +205,7 @@ To see the latest changes to the library please take a look at the [Changelog](h
 * [SimpleTransitionWithButtons.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitionWithButton/SimpleTransitionWithButton.ino) - event is now triggered via a hardware button
 * [TimedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/TimedTransitions/TimedTransitions.ino) - showcasing timed transitions
 * [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino) - regular and timed transitions
+* [MixedTransitionsBrowser.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitionsBrowser/MixedTransitionsBrowser.ino) - creates a webserver to show the Graphviz diagram of the state machine
 * [Guards.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/Guards/Guards.ino) - showing how to define guard functions
 
 ## Notes
