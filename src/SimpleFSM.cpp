@@ -13,6 +13,7 @@ SimpleFSM::SimpleFSM() :
   finished_cb(NULL),
   inital_state(NULL),
   dot_definition(""),
+  last_transition(0),
   current_state(NULL)
 {}
 
@@ -56,6 +57,7 @@ bool SimpleFSM::trigger(int event_id) {
       return _transitionTo(&(transitions[i]));
     }
   }
+  return false;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -117,7 +119,7 @@ void SimpleFSM::setFinishedHandler(CallbackFunction f) {
 /////////////////////////////////////////////////////////////////
 
 unsigned long SimpleFSM::lastTransitioned() const {
-  return (last_transition == -1) ? -1 : millis() - last_transition;
+  return (last_transition == 0) ? 0 : (millis() - last_transition);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -168,21 +170,22 @@ void SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NUL
 
 bool SimpleFSM::_initFSM() {
   unsigned long now = millis();
+  bool res = false;
   // do we need to do this?
   if (!is_initialized) {
     is_initialized = true;
     // is the inital state set?
     if (inital_state != NULL) {
-      return _changeToState(inital_state, now);
-    } else {
-      return false;
+      res = _changeToState(inital_state, now);
     }
   }
+  return res;
 }
 
 /////////////////////////////////////////////////////////////////
 
 bool SimpleFSM::_changeToState(State* s, unsigned long now) {
+  bool res = false;
   if (s != NULL) {
     prev_state = current_state;
     current_state = s;
@@ -193,10 +196,9 @@ bool SimpleFSM::_changeToState(State* s, unsigned long now) {
     // is this the end?
     if (s->is_final && finished_cb != NULL) finished_cb();
     if (s->is_final) is_finished = true;
-    return true;
-  } else {
-    return false;
+    res = true;
   }
+  return res;
 }
 
 /////////////////////////////////////////////////////////////////

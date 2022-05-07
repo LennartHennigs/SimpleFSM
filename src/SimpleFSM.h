@@ -55,7 +55,7 @@ class SimpleFSM {
     bool is_initialized = false;
     bool is_finished = false;
     unsigned long last_run = 0;
-    unsigned long last_transition = -1;
+    unsigned long last_transition = 0;
 
     State* inital_state = NULL;
     State* current_state = NULL;
