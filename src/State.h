@@ -29,8 +29,8 @@ class State {
     void setOnExitHandler(CallbackFunction f);
     void setAsFinal(bool final = true);
 
-    bool isFinal() const;
     int getID() const;
+    bool isFinal() const;
     String getName() const;
 
   protected:
