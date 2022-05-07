@@ -6,12 +6,6 @@ Arduino/ESP library to simplify setting up and running a state machinee.
 * Copyright (C) 2022 Lennart Hennigs.
 * Released under the MIT license.
 
-## Disclaimer
-
-* This library is not complete (yet) and a work in progress.
-* Some of the features mentioned below might not be done yet.
-* This document is also not complete
-
 ## Description
 
 * This library allows you to quickly setup a State Machine.
@@ -190,6 +184,7 @@ To see the latest changes to the library please take a look at the [Changelog](h
   ![MixedTransitions.ino example](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.svg?raw=true)
 
 * If the machine is running, the current state will be highlighted
+* Currently guard functions and end states are not shown in the graph
 * See [MixedTransitionsBrowser.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitionsBrowser/MixedTransitionsBrowser.ino) to learn how to run a webserver to show the Graphviz diagram of your state machine
 
 
