@@ -90,7 +90,8 @@ void SimpleFSM::setTransitionHandler(CallbackFunction f) {
 bool SimpleFSM::add(Transition t[], int size) {
   transitions = (Transition*) realloc(transitions, (num_standard + size) * sizeof(Transition));
   for (int i=0; i < size; i++) {
-    transitions[num_standard + i] = t[i];
+//    transitions[num_standard + i] = t[i];
+    memcpy(&transitions[num_standard + i], &t[i], sizeof(Transition));
     _addDotTransition(t[i]);
   }
   num_standard = num_standard + size;
@@ -102,12 +103,12 @@ bool SimpleFSM::add(Transition t[], int size) {
 bool SimpleFSM::add(TimedTransition t[], int size) {
   timed = (TimedTransition*) realloc(timed, (num_timed + size) * sizeof(TimedTransition));
   for (int i=0; i < size; i++) {
-    timed[num_timed + i] = t[i];
+//    timed[num_timed + i] = t[i];
+    memcpy(&timed[num_timed + i], &t[i], sizeof(TimedTransition));
     _addDotTransition(t[i]);
   }
   num_timed = num_timed + size;
   return true;
-
 }
 
 /////////////////////////////////////////////////////////////////
