@@ -4,7 +4,8 @@
 
 **Note:** Unreleased changes are checked in but not part of an official release (available through the Arduino IDE or PlatfomIO) yet. This allows you to test WiP features and give feedback to them.
 
- * none
+* none
+
 ## 1.1.0 - 2022-05-30
 
 * Added fix for ESP32 crashes as reported by [Erik](https://github.com/snowrodeo) in [#1](https://github.com/LennartHennigs/SimpleFSM/issues/1)
