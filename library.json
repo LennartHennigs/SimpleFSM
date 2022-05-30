@@ -1,6 +1,6 @@
 {
 	"name": "SimpleFSM",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"keywords": "State Machine, FSM, IoT",
 	"description": "Arduino Library that allows you to quickly define a state machine. It uses callbacks and offers several convenience functions for tracking the machine's state. Tested with Arduino, ESP8266 and ESP32.",
 	"homepage": "https://github.com/LennartHennigs/SimpleFSM",
