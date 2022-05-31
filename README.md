@@ -1,6 +1,6 @@
 # SimpleFSM
 
-Arduino/ESP library to simplify setting up and running a state machinee.
+Arduino/ESP library to simplify setting up and running a state machine.
 
 * Author: Lennart Hennigs (<https://www.lennarthennigs.de>)
 * Copyright (C) 2022 Lennart Hennigs.
@@ -22,7 +22,7 @@ Arduino/ESP library to simplify setting up and running a state machinee.
   * Transition execution
   * Final state reached
   * the run interval of the state machine
-* Definition of an in_state intervall
+* Definition of an in_state interval
 * Functions for tracking the behaviour and progress of the state machine
 * Creation of a `Graphviz` source file of your state machine definition
 * TBD: Storage of the current state on files with `LittleFS` or SD card storage (TBD)
