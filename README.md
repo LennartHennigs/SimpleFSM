@@ -78,7 +78,7 @@ To see the latest changes to the library please take a look at the [Changelog](h
   };
   ```
 
-* Define the triggeres for your state machine in an enum:
+* Define the triggeres for your state machine in an enum (and set the first enum value to 1, to be safe):
 
   ```c++
   enum triggers {
