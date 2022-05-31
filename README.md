@@ -135,7 +135,10 @@ To see the latest changes to the library please take a look at the [Changelog](h
 
 ### In-State Interval
 
-* States can have up to three events that are triggered, while they are in the state, and when they leave the state:
+* States can have up to three events...
+  * when they enter a state
+  * while they are in a state
+  * ...and when they leave the state
 
   ```c++
   State(String name, CallbackFunction on_enter, CallbackFunction on_state = NULL, CallbackFunction on_exit = NULL, bool is_final = false);
