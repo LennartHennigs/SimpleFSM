@@ -140,11 +140,11 @@ To see the latest changes to the library please take a look at the [Changelog](h
   * while they are in a state
   * ...and when they leave the state
 
-  ```c++
+```c++
   State(String name, CallbackFunction on_enter, CallbackFunction on_state = NULL, CallbackFunction on_exit = NULL, bool is_final = false);
-  ```
+```
 
-* To define how frequent the `on_state` event is called you can pass an interval (in ms) to the `run()` function:
+* To define how frequent the `on_state` event is called, pass an interval (in ms) to the `run()` function im your main `loop()`:
 
   ```c++
   void run(int interval = 1000, CallbackFunction tick_cb = NULL);
