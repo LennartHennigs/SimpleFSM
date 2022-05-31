@@ -187,7 +187,6 @@ To see the latest changes to the library please take a look at the [Changelog](h
 * Currently guard functions and end states are not shown in the graph
 * See [MixedTransitionsBrowser.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitionsBrowser/MixedTransitionsBrowser.ino) to learn how to run a webserver to show the Graphviz diagram of your state machine
 
-
 ## Class Definitions
 
 * [State.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/State.h)
