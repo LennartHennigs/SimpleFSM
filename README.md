@@ -8,8 +8,13 @@ Arduino/ESP library to simplify setting up and running a state machine.
 
 ## Description
 
-* This library allows you to quickly setup a State Machine.
-* Read here [what a state machine is](https://majenko.co.uk/blog/our-blog-1/the-finite-state-machine-26) and [why a state mache is neat for hardware projects](https://barrgroup.com/embedded-systems/how-to/state-machines-event-driven-systems?utm_source=pocket_mylist)
+This library allows you to quickly setup a State Machine. Read here [what a state machine is](https://majenko.co.uk/blog/our-blog-1/the-finite-state-machine-26) and [why a state mache is neat for hardware projects](https://barrgroup.com/embedded-systems/how-to/state-machines-event-driven-systems?utm_source=pocket_mylist)
+
+It has been tested with Arduino, ESP8266 and ESP32 devices.
+
+To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/master/CHANGELOG.md).
+
+If you find this library helpful please consider giving it a ⭐️ at [GitHub](https://github.com/LennartHennigs/SimpleFSM) and/or [buy me a ☕️](https://ko-fi.com/lennart0815). Thanks!
 
 ### Features
 
