@@ -2,9 +2,11 @@
 
 ## Unreleased
 
+- Refactored code in the main loop
+- Remove low level memory allocation commands to remove compliler warnings mentioned in [#2](https://github.com/LennartHennigs/SimpleFSM/issues/2)
+
 **Note:** Unreleased changes are checked in but not part of an official release (available through the Arduino IDE or PlatfomIO) yet. This allows you to test WiP features and give feedback to them.
 
-* none
 
 ## 1.1.0 - 2022-05-30
 
