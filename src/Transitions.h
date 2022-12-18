@@ -6,8 +6,8 @@
 
 /////////////////////////////////////////////////////////////////
 
-#include "State.h"
 #include "Arduino.h"
+#include "State.h"
 
 /////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,7 @@ class AbstractTransition {
 
   protected:
     static int _next_id;
-    int id;
+    int id = 0;
     String name = "";
     State* from = NULL; 
     State* to = NULL;

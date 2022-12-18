@@ -6,14 +6,10 @@ int AbstractTransition::_next_id = 0;
 
 /////////////////////////////////////////////////////////////////
 
-AbstractTransition::AbstractTransition() :
-  from(NULL),
-  to(NULL),
-  name(""),
-  on_run_cb(NULL),
-  guard_cb(NULL),
-  id(_next_id++)
-{}
+AbstractTransition::AbstractTransition() {
+  id = _next_id;
+  _next_id++;
+}
 
 /////////////////////////////////////////////////////////////////
 

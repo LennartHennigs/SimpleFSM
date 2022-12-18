@@ -11,8 +11,8 @@
 #endif
 #include "Arduino.h"
 
-#include "State.h"
 #include "Transitions.h"
+#include "State.h"
 
 /////////////////////////////////////////////////////////////////
 

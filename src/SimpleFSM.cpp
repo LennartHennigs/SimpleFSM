@@ -1,21 +1,11 @@
 /////////////////////////////////////////////////////////////////
+#include "Transitions.h"
+#include "State.h"
 #include "SimpleFSM.h"
 /////////////////////////////////////////////////////////////////
 
-SimpleFSM::SimpleFSM() : 
-  transitions(NULL),
-  timed(NULL),
-  num_standard(0),
-  num_timed(0),
-  last_run(0),
-  is_initialized(false),
-  on_transition_cb(NULL),
-  finished_cb(NULL),
-  inital_state(NULL),
-  dot_definition(""),
-  last_transition(0),
-  current_state(NULL)
-{}
+SimpleFSM::SimpleFSM(){
+}
 
 /////////////////////////////////////////////////////////////////
 
@@ -88,10 +78,9 @@ void SimpleFSM::setTransitionHandler(CallbackFunction f) {
 /////////////////////////////////////////////////////////////////
 
 bool SimpleFSM::add(Transition t[], int size) {
-  transitions = (Transition*) realloc(transitions, (num_standard + size) * sizeof(Transition));
+  transitions = new Transition[size];
   for (int i=0; i < size; i++) {
-//    transitions[num_standard + i] = t[i];
-    memcpy(&transitions[num_standard + i], &t[i], sizeof(Transition));
+    transitions[i] = t[i];
     _addDotTransition(t[i]);
   }
   num_standard = num_standard + size;
@@ -101,10 +90,9 @@ bool SimpleFSM::add(Transition t[], int size) {
 /////////////////////////////////////////////////////////////////
 
 bool SimpleFSM::add(TimedTransition t[], int size) {
-  timed = (TimedTransition*) realloc(timed, (num_timed + size) * sizeof(TimedTransition));
+    timed = new TimedTransition[size];
   for (int i=0; i < size; i++) {
-//    timed[num_timed + i] = t[i];
-    memcpy(&timed[num_timed + i], &t[i], sizeof(TimedTransition));
+    timed[i] = t[i];
     _addDotTransition(t[i]);
   }
   num_timed = num_timed + size;
@@ -136,35 +124,32 @@ void SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NUL
   // is the machine set up?
   if (!is_initialized) _initFSM();
   // are we ok?
-  if (current_state != NULL) {
-    if (now >= last_run + interval) {
-      last_run = now;
-      // are we done yet?
-      if (!is_finished) {
-        // trigger the on_state event
-        if (current_state->on_state != NULL) current_state->on_state();
+  if (current_state == NULL) return;
+  // is it time?
+  if (now < last_run + interval) return;
+  // are we done yet?
+  if (is_finished) return;
 
-        // go through the timed events
-        for (int i = 0; i < num_timed; i++) {
-          // am I in the right state
-          if (timed[i].from == current_state) {
-            // need to reset timer of transition?
-            if (timed[i].start == 0) {
-              timed[i].start = now;
-            // reached the interval?
-            } else if (now - timed[i].start >= timed[i].interval) {
-              if (_transitionTo(&timed[i])) {
-                timed[i].start = 0;
-                return;
-              }
-            }
-          }
-        }
-        // trigger the regular tick event
-        if (tick_cb != NULL) tick_cb();
+  last_run = now;
+  // trigger the on_state event
+  if (current_state->on_state != NULL) current_state->on_state();
+  // go through the timed events
+  for (int i = 0; i < num_timed; i++) {
+    // am I in the right state?
+    if (timed[i].from != current_state) break;
+    // need to reset timer of transition?
+    if (timed[i].start == 0) {
+      timed[i].start = now;
+    // reached the interval?
+    } else if (now - timed[i].start >= timed[i].interval) {
+      if (_transitionTo(&timed[i])) {
+        timed[i].start = 0;
+        return;
       }
     }
   }
+  // trigger the regular tick event
+  if (tick_cb != NULL) tick_cb();
 }
 
 /////////////////////////////////////////////////////////////////
