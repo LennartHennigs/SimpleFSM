@@ -128,23 +128,24 @@ void SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NUL
   // is it time?
   if (now < last_run + interval) return;
   // are we done yet?
+  last_run = now;
   if (is_finished) return;
 
-  last_run = now;
   // trigger the on_state event
   if (current_state->on_state != NULL) current_state->on_state();
   // go through the timed events
   for (int i = 0; i < num_timed; i++) {
-    // am I in the right state?
-    if (timed[i].from != current_state) break;
-    // need to reset timer of transition?
-    if (timed[i].start == 0) {
-      timed[i].start = now;
-    // reached the interval?
-    } else if (now - timed[i].start >= timed[i].interval) {
-      if (_transitionTo(&timed[i])) {
-        timed[i].start = 0;
-        return;
+    // am I in the right state?    
+    if (timed[i].from == current_state) {
+      // need to reset timer of transition?
+      if (timed[i].start == 0) {
+        timed[i].start = now;
+      // reached the interval?
+      } else if (now - timed[i].start >= timed[i].interval) {
+        if (_transitionTo(&timed[i])) {
+          timed[i].start = 0;
+          return;
+        }
       }
     }
   }
