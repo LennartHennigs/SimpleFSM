@@ -11,8 +11,8 @@
 - Refactored code
 - Changed `bool add()` to `void add()`
 - Fixed bug, that the "ongoing state" was also called when a timed transition happens
-- Remove low level memory allocation commands to remove compliler warnings mentioned in [#2](https://github.com/LennartHennigs/SimpleFSM/issues/2)
-- updated examples (added explanation and some addition call backs to show the state of the FSM)
+- Remove low-level memory allocation commands to remove compiler warnings mentioned in [#2](https://github.com/LennartHennigs/SimpleFSM/issues/2)
+- Updated examples (added explanation and some additional callbacks to show the state of the FSM)
 
 ## 1.1.0 - 2022-05-30
 
