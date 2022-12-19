@@ -2,11 +2,13 @@
 
 ## Unreleased
 
-- Refactored code in the main loop
+- Refactored code
+- changed `bool add()` to `void add()`
+- Fixed bug, that the "ongoing state" was also called when a timed transition happens
 - Remove low level memory allocation commands to remove compliler warnings mentioned in [#2](https://github.com/LennartHennigs/SimpleFSM/issues/2)
+- updated examples (added explanation and some addition call backs to show the state of the FSM)
 
 **Note:** Unreleased changes are checked in but not part of an official release (available through the Arduino IDE or PlatfomIO) yet. This allows you to test WiP features and give feedback to them.
-
 
 ## 1.1.0 - 2022-05-30
 
@@ -14,12 +16,12 @@
 
 ## 1.0.1 - 2022-05-07
 
-* Removed complie warnings for `SimpleFSM.cpp`
-* Updated `.gitignore`
+- Removed complie warnings for `SimpleFSM.cpp`
+- Updated `.gitignore`
 
 ## 1.0.0 - 2022-05-07
 
-* Initial release
+- Initial release
 
 ## Note
 
