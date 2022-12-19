@@ -77,26 +77,22 @@ void SimpleFSM::setTransitionHandler(CallbackFunction f) {
 
 /////////////////////////////////////////////////////////////////
 
-bool SimpleFSM::add(Transition t[], int size) {
-  transitions = new Transition[size];
-  for (int i=0; i < size; i++) {
-    transitions[i] = t[i];
-    _addDotTransition(t[i]);
+void SimpleFSM::add(Transition t[], int size) {
+  transitions = t;
+  num_standard = size;
+    for (int i=0; i < size; i++) {
+      _addDotTransition(transitions[i]);
   }
-  num_standard = num_standard + size;
-  return true;
 }
 
 /////////////////////////////////////////////////////////////////
 
-bool SimpleFSM::add(TimedTransition t[], int size) {
-    timed = new TimedTransition[size];
+void SimpleFSM::add(TimedTransition t[], int size) {
+  timed = t;
+  num_timed = size;
   for (int i=0; i < size; i++) {
-    timed[i] = t[i];
-    _addDotTransition(t[i]);
+    _addDotTransition(timed[i]);
   }
-  num_timed = num_timed + size;
-  return true;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -128,27 +124,28 @@ void SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NUL
   // is it time?
   if (now < last_run + interval) return;
   // are we done yet?
-  last_run = now;
   if (is_finished) return;
+  last_run = now;
 
-  // trigger the on_state event
-  if (current_state->on_state != NULL) current_state->on_state();
   // go through the timed events
   for (int i = 0; i < num_timed; i++) {
-    // am I in the right state?    
-    if (timed[i].from == current_state) {
-      // need to reset timer of transition?
-      if (timed[i].start == 0) {
-        timed[i].start = now;
-      // reached the interval?
-      } else if (now - timed[i].start >= timed[i].interval) {
-        if (_transitionTo(&timed[i])) {
-          timed[i].start = 0;
-          return;
-        }
+    if (timed[i].from != current_state) continue;
+
+    // start the transition timer 
+    if (timed[i].start == 0) {
+      timed[i].start = now;
+      continue;
+    }
+    // reached the interval?
+    if (now - timed[i].start >= timed[i].interval) {
+      if (_transitionTo(&timed[i])) {
+        timed[i].start = 0;
+        return;
       }
     }
   }
+  // trigger the on_state event
+  if (current_state->on_state != NULL) current_state->on_state();
   // trigger the regular tick event
   if (tick_cb != NULL) tick_cb();
 }
@@ -156,54 +153,41 @@ void SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NUL
 /////////////////////////////////////////////////////////////////
 
 bool SimpleFSM::_initFSM() {
-  unsigned long now = millis();
-  bool res = false;
-  // do we need to do this?
-  if (!is_initialized) {
-    is_initialized = true;
-    // is the inital state set?
-    if (inital_state != NULL) {
-      res = _changeToState(inital_state, now);
-    }
-  }
-  return res;
+  if (is_initialized) return false;
+  is_initialized = true;
+  if (inital_state == NULL) return false;
+  return _changeToState(inital_state, millis());
 }
 
 /////////////////////////////////////////////////////////////////
 
 bool SimpleFSM::_changeToState(State* s, unsigned long now) {
-  bool res = false;
-  if (s != NULL) {
-    prev_state = current_state;
-    current_state = s;
-    if (s->on_enter != NULL) s->on_enter();
-    last_run = now;
-    // to make it accessible within on_enter
-    last_transition = now;
-    // is this the end?
-    if (s->is_final && finished_cb != NULL) finished_cb();
-    if (s->is_final) is_finished = true;
-    res = true;
-  }
-  return res;
+  if (s == NULL) return false;
+  // set the new state
+  prev_state = current_state;
+  current_state = s;
+  if (s->on_enter != NULL) s->on_enter();
+  // save the time
+  last_run = now;
+  last_transition = now;
+  // is this the end?
+  if (s->is_final && finished_cb != NULL) finished_cb();
+  if (s->is_final) is_finished = true;
+  return true;
 }
 
 /////////////////////////////////////////////////////////////////
 
 bool SimpleFSM::_transitionTo(AbstractTransition* transition) {
-  unsigned long now = millis();
-  if (transition->to == NULL) {
-    return false;
-  } 
+  // empty parameter?
+  if (transition->to == NULL) return false;
   // can I pass the guard
-  if (transition->guard_cb != NULL && !transition->guard_cb()) {
-    return false;
-  }
+  if (transition->guard_cb != NULL && !transition->guard_cb()) return false;
+  // trigger events
   if (transition->from->on_exit != NULL) transition->from->on_exit();      
   if (transition->on_run_cb != NULL) transition->on_run_cb();
   if (on_transition_cb != NULL) on_transition_cb();
-  
-  return _changeToState(transition->to, now);
+  return _changeToState(transition->to, millis());
 }
 
 /////////////////////////////////////////////////////////////////

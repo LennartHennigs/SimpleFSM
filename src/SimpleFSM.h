@@ -27,8 +27,8 @@ class SimpleFSM {
     SimpleFSM(State* initial_state);
     ~SimpleFSM();
 
-    bool add(Transition t[], int size);
-    bool add(TimedTransition t[], int size);
+    void add(Transition t[], int size);
+    void add(TimedTransition t[]  , int size);
 
     void setInitialState(State* state);
     void setFinishedHandler(CallbackFunction f);
