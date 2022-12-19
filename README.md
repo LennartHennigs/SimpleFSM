@@ -48,6 +48,17 @@ To see the latest changes to the library please take a look at the [Changelog](h
 * A finite state machine has a defined set of states
 * A state must have a name...
 * ...and can have callback functions for different events (when a state is entered, exited, or stays in a state)
+
+```c++
+  State(
+    String name, 
+    CallbackFunction on_enter, 
+    CallbackFunction on_state = NULL, 
+    CallbackFunction on_exit = NULL, 
+    bool is_final = false
+  );
+```
+
 * Most states will have the entry handler
 * The easiest way to define states is creating using an array, e.g. as shown in [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino):
   
@@ -73,6 +84,17 @@ To see the latest changes to the library please take a look at the [Changelog](h
 * Note: Both classes are based of an abstract class which is not to be used in your code.
 
 ### Regular Transitions
+
+```c++
+  Transition(
+    State* from, 
+    State* to, 
+    int event_id, 
+    CallbackFunction on_run = NULL, 
+    String name = "", 
+    GuardCondition guard = NULL
+  );
+```
 
 * Regular transitions must have a a set of states and a trigger (ID):
 
@@ -100,6 +122,17 @@ To see the latest changes to the library please take a look at the [Changelog](h
 * See [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitions/SimpleTransitions.ino) and [SimpleTransitionWithButtons.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitionWithButton/SimpleTransitionWithButton.ino) for more details
 
 ### Timed Transitions
+
+```c++
+  TimedTransition(
+    State* from, 
+    State* to, 
+    int interval, 
+    CallbackFunction on_run = NULL, 
+    String name = "", 
+    GuardCondition guard = NULL
+  );
+```
 
 * Timed transitions are automatically executed after a certain amount of time has passed
 * The interval is defined in milliseconds:
