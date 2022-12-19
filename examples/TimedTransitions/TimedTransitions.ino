@@ -1,4 +1,10 @@
 /////////////////////////////////////////////////////////////////
+/*
+    This emulates a traffi light.
+    Every 6 seconds the light will turn red, every 4 seconds green.
+    While green, a "." is displayed
+*/
+/////////////////////////////////////////////////////////////////
 
 #include "SimpleFSM.h"
 
@@ -9,19 +15,22 @@ SimpleFSM fsm;
 /////////////////////////////////////////////////////////////////
 
 void on_red() {
-  Serial.println("State: RED");
+  Serial.println("\nState: RED");
 }
  
 void on_green() {
-  Serial.println("State: GREEN");
+  Serial.println("\nState: GREEN");
 }
 
+void ongoing() {
+  Serial.print(".");
+}
 /////////////////////////////////////////////////////////////////
 
 
 State s[] = {
-  State("red",        on_red),
-  State("green",      on_green)
+  State("red", on_red),
+  State("green", on_green, ongoing)
 };
 
 TimedTransition timedTransitions[] = {

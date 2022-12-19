@@ -17,10 +17,10 @@
 
 /////////////////////////////////////////////////////////////////
 
-#define BUTTON_PIN  D4
+#define BUTTON_PIN  39
 
-#define WIFI_SSID    "SSID"
-#define WIFI_PASSWD  "*********"
+#define WIFI_SSID    "Zeltlager"
+#define WIFI_PASSWD  "HeerSZ7!D32015"
 
 /////////////////////////////////////////////////////////////////
 
@@ -49,23 +49,27 @@ bool connectToWiFi(char* ssid, char* passwd, int timeout_after =-1) {
 /////////////////////////////////////////////////////////////////
 
 void on_red() {
-  Serial.println("State: RED");
+  Serial.println("\nState: RED");
 }
  
 void on_green() {
-  Serial.println("State: GREEN");
+  Serial.println("\nState: GREEN");
+}
+
+void ongoing() {
+  Serial.print(".");
 }
 
 void on_button_press() {
-  Serial.println("BUTTON!");
+  Serial.println("\nBUTTON!");
 }
 
 /////////////////////////////////////////////////////////////////
 
 State s[] = {
-  State("red light",          on_red),
-  State("green light",        on_green),
-  State("button pressed", on_button_press)
+  State("red light", on_red, ongoing),
+  State("green light", on_green, ongoing),
+  State("button pressed", on_button_press, ongoing)
 };
 
 enum triggers {
@@ -79,7 +83,7 @@ Transition transitions[] = {
 TimedTransition timedTransitions[] = {
   TimedTransition(&s[0], &s[1], 6000),
   TimedTransition(&s[1], &s[0], 4000),
-  TimedTransition(&s[2], &s[1], 2000)
+  TimedTransition(&s[2], &s[1], 1000)
 };
 
 int num_transitions = sizeof(transitions) / sizeof(Transition);

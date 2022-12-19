@@ -1,4 +1,11 @@
 /////////////////////////////////////////////////////////////////
+/*
+    This emulates an blinken light.
+    Every four seconds will the light turn on or off.
+    While the light is "on", a "." will be shown.
+*/
+
+/////////////////////////////////////////////////////////////////
 
 #include "SimpleFSM.h"
 
@@ -17,11 +24,11 @@ void light_off() {
 }
 
 void exit_light_on() {
-  Serial.println("Leaving State: ON ");
+  Serial.println("\nLeaving State: ON ");
 }
  
 void exit_light_off() {
-  Serial.println("Leaving State: OFF");
+  Serial.println("\nLeaving State: OFF");
 }
 
 void on_to_off() {
@@ -39,8 +46,8 @@ void ongoing() {
 /////////////////////////////////////////////////////////////////
 
 State s[] = {
-  State("on",   light_on,   ongoing,  exit_light_on),
-  State("off",  light_off,  NULL,     exit_light_off)
+  State("on",   light_on, ongoing, exit_light_on),
+  State("off",  light_off, ongoing, exit_light_off)
 };
 
 enum triggers {

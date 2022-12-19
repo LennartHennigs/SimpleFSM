@@ -1,4 +1,12 @@
 /////////////////////////////////////////////////////////////////
+/*
+    This example showcases how guards work.
+    It emulates a time bomb count down.
+
+    As long as the countdown is not zero the FSM stays in the counting state.
+    When it reaches zero it goes to the exploding state.
+*/
+/////////////////////////////////////////////////////////////////
 
 #include "SimpleFSM.h"
 
@@ -19,7 +27,7 @@ void boom() {
 }
 
 bool not_zero_yet() {
-  return countdown != 0;
+  return !zero_yet();
 }
 
 bool zero_yet() {
@@ -43,8 +51,8 @@ State s[] = {
 };
 
 TimedTransition timedTransitions[] = {
-  TimedTransition(&s[0], &s[1], 1000, NULL, "", zero_yet),
   TimedTransition(&s[0], &s[0], 1000, NULL, "", not_zero_yet)
+  TimedTransition(&s[0], &s[1], 1000, NULL, "", zero_yet),
 };
 
 int num_timed = sizeof(timedTransitions) / sizeof(TimedTransition);
