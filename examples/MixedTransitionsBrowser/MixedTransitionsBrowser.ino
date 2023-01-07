@@ -19,8 +19,8 @@
 
 #define BUTTON_PIN  39
 
-#define WIFI_SSID    "Zeltlager"
-#define WIFI_PASSWD  "HeerSZ7!D32015"
+#define WIFI_SSID    "SSID"
+#define WIFI_PASSWD  "PWD"
 
 /////////////////////////////////////////////////////////////////
 
