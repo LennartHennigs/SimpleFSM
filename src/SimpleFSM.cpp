@@ -1,10 +1,11 @@
 /////////////////////////////////////////////////////////////////
-#include "Transitions.h"
-#include "State.h"
 #include "SimpleFSM.h"
+
+#include "State.h"
+#include "Transitions.h"
 /////////////////////////////////////////////////////////////////
 
-SimpleFSM::SimpleFSM(){
+SimpleFSM::SimpleFSM() {
 }
 
 /////////////////////////////////////////////////////////////////
@@ -35,7 +36,7 @@ void SimpleFSM::reset() {
 
 void SimpleFSM::setInitialState(State* state) {
   inital_state = state;
-  }
+}
 
 /////////////////////////////////////////////////////////////////
 
@@ -58,7 +59,6 @@ State* SimpleFSM::getPreviousState() const {
 
 /////////////////////////////////////////////////////////////////
 
-
 State* SimpleFSM::getState() const {
   return current_state;
 }
@@ -80,8 +80,8 @@ void SimpleFSM::setTransitionHandler(CallbackFunction f) {
 void SimpleFSM::add(Transition t[], int size) {
   transitions = t;
   num_standard = size;
-    for (int i=0; i < size; i++) {
-      _addDotTransition(transitions[i]);
+  for (int i = 0; i < size; i++) {
+    _addDotTransition(transitions[i]);
   }
 }
 
@@ -90,7 +90,7 @@ void SimpleFSM::add(Transition t[], int size) {
 void SimpleFSM::add(TimedTransition t[], int size) {
   timed = t;
   num_timed = size;
-  for (int i=0; i < size; i++) {
+  for (int i = 0; i < size; i++) {
     _addDotTransition(timed[i]);
   }
 }
@@ -130,8 +130,7 @@ void SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NUL
   // go through the timed events
   for (int i = 0; i < num_timed; i++) {
     if (timed[i].from != current_state) continue;
-
-    // start the transition timer 
+    // start the transition timer
     if (timed[i].start == 0) {
       timed[i].start = now;
       continue;
@@ -184,7 +183,7 @@ bool SimpleFSM::_transitionTo(AbstractTransition* transition) {
   // can I pass the guard
   if (transition->guard_cb != NULL && !transition->guard_cb()) return false;
   // trigger events
-  if (transition->from->on_exit != NULL) transition->from->on_exit();      
+  if (transition->from->on_exit != NULL) transition->from->on_exit();
   if (transition->on_run_cb != NULL) transition->on_run_cb();
   if (on_transition_cb != NULL) on_transition_cb();
   return _changeToState(transition->to, millis());
@@ -199,7 +198,7 @@ String SimpleFSM::getDotDefinition() {
 /////////////////////////////////////////////////////////////////
 
 String SimpleFSM::_dot_transition(String from, String to, String label, String param) {
-  return "\t\"" + from + "\" -> \"" + to + "\"" +  " [label=\"" + label + " (" + param + ")\"];\n";
+  return "\t\"" + from + "\" -> \"" + to + "\"" + " [label=\"" + label + " (" + param + ")\"];\n";
 }
 
 /////////////////////////////////////////////////////////////////

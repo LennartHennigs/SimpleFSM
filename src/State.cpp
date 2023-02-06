@@ -24,7 +24,7 @@ void State::setup(String name, CallbackFunction on_enter, CallbackFunction on_st
   this->on_exit = on_exit;
   this->id = _next_id++;
   this->is_final = is_final;
-} 
+}
 
 /////////////////////////////////////////////////////////////////
 
