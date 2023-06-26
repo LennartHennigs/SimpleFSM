@@ -10,11 +10,11 @@
 /////////////////////////////////////////////////////////////////
 
 #include "SimpleFSM.h"
-#include "Button2.h"    // https://github.com/LennartHennigs/Button2
+#include "Button2.h"  // https://github.com/LennartHennigs/Button2
 
 /////////////////////////////////////////////////////////////////
 
-#define BUTTON_PIN  39
+#define BUTTON_PIN 39
 
 /////////////////////////////////////////////////////////////////
 
@@ -26,7 +26,7 @@ Button2 btn;
 void on_red() {
   Serial.println("\nState: RED");
 }
- 
+
 void on_green() {
   Serial.println("\nState: GREEN");
 }
@@ -48,7 +48,7 @@ State s[] = {
 };
 
 enum triggers {
-  button_was_pressed = 1  
+  button_was_pressed = 1
 };
 
 Transition transitions[] = {
@@ -80,14 +80,14 @@ void setup() {
   Serial.println();
   Serial.println();
   Serial.println("SimpleFSM - Mixed Transition (Traffic light with button for green)\n");
-    
+
   fsm.add(timedTransitions, num_timed);
   fsm.add(transitions, num_transitions);
-  
+
   fsm.setInitialState(&s[0]);
 
   btn.begin(BUTTON_PIN);
-  btn.setTapHandler(button_handler); 
+  btn.setTapHandler(button_handler);
 }
 
 /////////////////////////////////////////////////////////////////
