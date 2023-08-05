@@ -3,12 +3,12 @@
 Arduino/ESP library to simplify setting up and running a state machine.
 
 * Author: Lennart Hennigs (<https://www.lennarthennigs.de>)
-* Copyright (C) 2022 Lennart Hennigs.
+* Copyright (C) 2023 Lennart Hennigs.
 * Released under the MIT license.
 
 ## Description
 
-This library allows you to quickly setup a State Machine. Read here [what a state machine is](https://majenko.co.uk/blog/our-blog-1/the-finite-state-machine-26) and [why a state mache is neat for hardware projects](https://barrgroup.com/embedded-systems/how-to/state-machines-event-driven-systems?utm_source=pocket_mylist).
+This library allows you to quickly setup a State Machine. Read here [what a state machine is](https://majenko.co.uk/blog/our-blog-1/the-finite-state-machine-26) and [why a state machine is neat for hardware projects](https://barrgroup.com/embedded-systems/how-to/state-machines-event-driven-systems?utm_source=pocket_mylist).
 
 It has been tested with Arduino, ESP8266 and ESP32 devices.
 
@@ -28,7 +28,7 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
   * Final state reached
   * the run interval of the state machine
 * Definition of an in_state interval
-* Functions for tracking the behaviour and progress of the state machine
+* Functions for tracking the behavior and progress of the state machine
 * Creation of a `Graphviz` source file of your state machine definition
 * TBD: Storage of the current state on files with `LittleFS` or SD card storage (TBD)
   
@@ -39,7 +39,7 @@ To see the latest changes to the library please take a look at the [Changelog](h
 * You first need to define a set of states for your state machine
 * Then, define transitions (regular or timed) for these state
 * Pass the transitions to your state machine
-* Define an inital state
+* Define an initial state
 * ...and add the `run()` function in your loop
 * See [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino) for a basic example
 
@@ -258,7 +258,7 @@ Or download the ZIP archive (<https://github.com/lennarthennigs/SimpleFSM/zipbal
 
 MIT License
 
-Copyright (c) 2022 Lennart Hennigs
+Copyright (c) 2023 Lennart Hennigs
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
