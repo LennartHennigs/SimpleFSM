@@ -66,7 +66,7 @@ int num_timed = sizeof(timedTransitions) / sizeof(TimedTransition);
 
 /////////////////////////////////////////////////////////////////
 
-void button_handler(Button2 btn) {
+void button_handler(Button2 &btn) {
   fsm.trigger(button_was_pressed);
 }
 

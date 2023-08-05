@@ -68,7 +68,7 @@ int num_transitions = sizeof(transitions) / sizeof(Transition);
 
 /////////////////////////////////////////////////////////////////
 
-void button_handler(Button2 btn) {
+void button_handler(Button2 &btn) {
   if (fsm.getState() == &s[0]) Serial.println();
   
   Serial.println("BUTTON: I was flipped");
