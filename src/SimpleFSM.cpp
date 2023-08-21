@@ -78,10 +78,41 @@ void SimpleFSM::setTransitionHandler(CallbackFunction f) {
 /////////////////////////////////////////////////////////////////
 
 void SimpleFSM::add(Transition t[], int size) {
-  transitions = t;
-  num_standard = size;
-  for (int i = 0; i < size; i++) {
-    _addDotTransition(transitions[i]);
+  if ( (transitions = (Transition *) malloc( size * sizeof( Transition ))) != NULL) {
+    Transition* ptr;
+    int i;
+    num_standard = size;
+    for ( ptr = transitions, i=0; i < size; ++i ) {
+      *ptr++ = t[i];
+      _addDotTransition(transitions[i]);
+    } 
+    num_standard = size;
+  } else { /*  malloc error  */
+    Serial.print( "Out of storage" );
+    abort();
+  }
+}
+
+/////////////////////////////////////////////////////////////////
+
+void SimpleFSM::addIncremental(Transition t[], int size) {
+  if ( (transitions == NULL) || (num_standard == 0) ) {
+    add(t, size);
+  }
+  else {
+    if ( (transitions = (Transition *) realloc(transitions, (num_standard + size) * sizeof( Transition ))) != NULL) {    
+      Transition* ptr;
+      int i;
+      for ( ptr = (transitions + num_standard), i=0; i < size; ++i ) {
+        *ptr++ = t[i];
+        _addDotTransition(transitions[(i+num_standard)]);
+      }
+      num_standard += size;
+    }
+    else { /* realloc error */
+      Serial.print( "Out of storage" );
+      abort();
+    }
   }
 }
 
