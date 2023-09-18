@@ -82,7 +82,7 @@ TimedTransition::TimedTransition() : start(0), interval(0) {}
 
 /////////////////////////////////////////////////////////////////
 
-TimedTransition::TimedTransition(State* from, State* to, int interval, CallbackFunction on_run /* = NULL */, String name /* = "" */, GuardCondition guard /* = NULL */) {
+TimedTransition::TimedTransition(State* from, State* to, int interval, CallbackFunction on_run /* = NULL */, String name /* = "" */, GuardCondition guard /* = NULL */) : TimedTransition() {
   setup(from, to, interval, on_run, name, guard);
 }
 
