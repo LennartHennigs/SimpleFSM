@@ -73,6 +73,8 @@ class TimedTransition : public AbstractTransition {
   int getID() const;
   int getInterval() const;
 
+  void reset();
+
  protected:
   unsigned long start;
   unsigned long interval;

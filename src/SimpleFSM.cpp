@@ -27,9 +27,17 @@ SimpleFSM::~SimpleFSM() {
 /////////////////////////////////////////////////////////////////
 
 void SimpleFSM::reset() {
-  is_initialized = 0;
+  is_initialized = false;
+  is_finished = false;
   last_run = 0;
+  last_transition = 0;
   setInitialState(inital_state);
+  current_state = NULL;
+  prev_state = NULL;
+
+    for (int i = 0; i < num_timed; i++) {
+      timed[i].reset();
+  }
 }
 
 /////////////////////////////////////////////////////////////////
