@@ -12,7 +12,7 @@ State::State() {
 /////////////////////////////////////////////////////////////////
 
 State::State(String name, CallbackFunction on_enter, CallbackFunction on_state, CallbackFunction on_exit, bool is_final /* = false */) {
-  setup(name, on_enter, on_state, on_exit);
+  setup(name, on_enter, on_state, on_exit, is_final);
 }
 
 /////////////////////////////////////////////////////////////////
