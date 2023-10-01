@@ -18,8 +18,6 @@ SimpleFSM::SimpleFSM(State* initial_state) {
 /////////////////////////////////////////////////////////////////
 
 SimpleFSM::~SimpleFSM() {
-  free(transitions);
-  free(timed);
   transitions = NULL;
   timed = NULL;
 }
