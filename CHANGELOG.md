@@ -3,9 +3,9 @@
 ## Unreleased
 
 - Fixed `TimedTranisions` constructor as mentioned in [#9](https://github.com/LennartHennigs/SimpleFSM/issues/9)
-- Fixed error in `State` constructor [#12](https://github.com/LennartHennigs/SimpleFSM/issues/12)
-- Fixed memory handling in `SimpleFSM` destructor [#8](https://github.com/LennartHennigs/SimpleFSM/issues/8)
-- Updated the button handlers in `MixedTransitions.ino`and `SimpleTransitionWithButton.ino as mentioned in [#4](https://github.com/LennartHennigs/SimpleFSM/issues/4)
+- Fixed error in `State` constructor as mentioned in [#12](https://github.com/LennartHennigs/SimpleFSM/issues/12)
+- Fixed memory handling in `SimpleFSM` destructor as mentioned in [#8](https://github.com/LennartHennigs/SimpleFSM/issues/8)
+- Updated the button handlers in `MixedTransitions.ino`and `SimpleTransitionWithButton.ino` as mentioned in [#4](https://github.com/LennartHennigs/SimpleFSM/issues/4)
 
 **Note:** Unreleased changes are checked in but not part of an official release (available through the Arduino IDE or PlatfomIO) yet. This allows you to test WiP features and give feedback to them.
 
