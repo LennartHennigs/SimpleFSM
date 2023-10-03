@@ -135,8 +135,16 @@ void SimpleFSM::setTransitionHandler(CallbackFunction f) {
  */
 
 void SimpleFSM::add(Transition newTransitions[], int size) {
-  // Allocate or expand storage for transitions
-  Transition* temp = new Transition[num_standard + size];
+  // Count the number of unique transitions
+  int uniqueCount = 0;
+  for (int i = 0; i < size; ++i) {
+    if (!_isDuplicate(newTransitions[i], transitions, num_standard) && 
+        !_isDuplicate(newTransitions[i], newTransitions, i)) {
+      uniqueCount++;
+    }
+  }
+  // Allocate or expand storage for transitions with exact size
+  Transition* temp = new Transition[num_standard + uniqueCount];
   if (transitions != NULL) {
     memcpy(temp, transitions, num_standard * sizeof(Transition));
     delete[] transitions;
@@ -149,7 +157,7 @@ void SimpleFSM::add(Transition newTransitions[], int size) {
   }
   // Add new transitions, avoiding duplicates
   for (int i = 0; i < size; ++i) {
-    if (!_isDuplicate(newTransitions[i], transitions, num_standard) &&
+    if (!_isDuplicate(newTransitions[i], transitions, num_standard) && 
         !_isDuplicate(newTransitions[i], newTransitions, i)) {
       transitions[num_standard] = newTransitions[i];
       _addDotTransition(transitions[num_standard]);
@@ -167,8 +175,16 @@ void SimpleFSM::add(Transition newTransitions[], int size) {
   */
 
 void SimpleFSM::add(TimedTransition newTransitions[], int size) {
-  // Allocate memory or expand existing storage
-  TimedTransition* temp = new TimedTransition[num_timed + size];
+  // Count the number of unique transitions
+  int uniqueCount = 0;
+  for (int i = 0; i < size; ++i) {
+    if (!_isDuplicate(newTransitions[i], timed, num_timed) && 
+        !_isDuplicate(newTransitions[i], newTransitions, i)) {
+      uniqueCount++;
+    }
+  }
+  // Allocate memory or expand existing storage with exact size
+  TimedTransition* temp = new TimedTransition[num_timed + uniqueCount];
   if (timed != NULL) {
     memcpy(temp, timed, num_timed * sizeof(TimedTransition));
     delete[] timed;
