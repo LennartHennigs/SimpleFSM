@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////
 /*
-    This emulates a traffi light.
+    This emulates a traffic light.
     Every 6 seconds the light will turn red, every 4 seconds green.
     While green, a "." is displayed
 */
