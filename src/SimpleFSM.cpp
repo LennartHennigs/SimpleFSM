@@ -134,26 +134,27 @@ void SimpleFSM::setTransitionHandler(CallbackFunction f) {
  * @param size The size of the array.  
  */
 
-void SimpleFSM::add(Transition t[], int size) {
-  // first time?
-  if ((transitions == NULL) || (num_standard == 0) ) {
-    transitions = (Transition *) malloc(size * sizeof(Transition));
-  // not the first time?
-  } else {
-    transitions = (Transition *) realloc(transitions, (num_standard + size) * sizeof(Transition));        
+void SimpleFSM::add(Transition newTransitions[], int size) {
+  // Allocate or expand storage for transitions
+  Transition* temp = new Transition[num_standard + size];
+  if (transitions != NULL) {
+    memcpy(temp, transitions, num_standard * sizeof(Transition));
+    delete[] transitions;
   }
-  // was memory allocated?
+  transitions = temp;
+  // Check if memory allocation was successful
   if (transitions == NULL) {
-    Serial.print( "Out of storage" );
+    Serial.print("Out of storage");
     abort();
   }
-  // assign transitions
-  int i;
-  Transition* ptr;
-  for (ptr = (transitions + num_standard), i=0; i < size; ++i ) {
-    *ptr++ = t[i];
-    _addDotTransition(transitions[(i + num_standard)]);
-    num_standard += size;
+  // Add new transitions, avoiding duplicates
+  for (int i = 0; i < size; ++i) {
+    if (!_isDuplicate(newTransitions[i], transitions, num_standard) &&
+        !_isDuplicate(newTransitions[i], newTransitions, i)) {
+      transitions[num_standard] = newTransitions[i];
+      _addDotTransition(transitions[num_standard]);
+      num_standard++;
+    }
   }
 }
 
@@ -165,27 +166,60 @@ void SimpleFSM::add(Transition t[], int size) {
   * @param size The size of the array.  
   */
 
-void SimpleFSM::add(TimedTransition t[], int size) {
-  // first time?
-  if ((timed == NULL) || (num_timed == 0) ) {
-    timed = (TimedTransition *) malloc(size * sizeof(TimedTransition));
-  // not the first time?
-  } else {
-    timed = (TimedTransition *) realloc(timed, (num_timed + size) * sizeof(TimedTransition));        
+void SimpleFSM::add(TimedTransition newTransitions[], int size) {
+  // Allocate memory or expand existing storage
+  TimedTransition* temp = new TimedTransition[num_timed + size];
+  if (timed != NULL) {
+    memcpy(temp, timed, num_timed * sizeof(TimedTransition));
+    delete[] timed;
   }
-  // was memory allocated?
+  timed = temp;
+  // Check memory allocation
   if (timed == NULL) {
-    Serial.print( "Out of storage" );
+    Serial.print("Out of storage");
     abort();
   }
-  // assign transitions
-  int i;
-  TimedTransition* ptr;
-  for (ptr = (timed + num_timed), i=0; i < size; ++i ) {
-    *ptr++ = t[i];
-    _addDotTransition(timed[(i + num_timed)]);
+  // Add new transitions while avoiding duplicates
+  for (int i = 0; i < size; ++i) {
+    if (!_isDuplicate(newTransitions[i], timed, num_timed) && 
+        !_isDuplicate(newTransitions[i], newTransitions, i)) {
+      timed[num_timed] = newTransitions[i];
+      _addDotTransition(timed[num_timed]);
+      num_timed++;
+    }
   }
-  num_timed += size;
+}
+
+/////////////////////////////////////////////////////////////////
+/*
+ * Check if a timed transition is a duplicate.
+ */
+ 
+bool SimpleFSM::_isDuplicate(const TimedTransition& transition, const TimedTransition* transitionArray, int arraySize) const {
+  for (int i = 0; i < arraySize; ++i) {
+    if (transitionArray[i].from == transition.from &&
+        transitionArray[i].to == transition.to &&
+        transitionArray[i].interval == transition.interval) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/////////////////////////////////////////////////////////////////
+/*
+ * Check if a transition is a duplicate.
+ */
+
+bool SimpleFSM::_isDuplicate(const Transition& transition, const Transition* transitionArray, int arraySize) const {
+  for (int i = 0; i < arraySize; ++i) {
+    if (transitionArray[i].from == transition.from &&
+        transitionArray[i].to == transition.to &&
+        transitionArray[i].event_id == transition.event_id) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -258,7 +292,6 @@ void SimpleFSM::_handleTimedEvents(unsigned long now) {
       timed[i].start = now;
       continue;
     }
-
     // reached the interval?
     if (now - timed[i].start >= timed[i].interval) {
       if (_transitionTo(&timed[i])) {
@@ -361,22 +394,3 @@ void SimpleFSM::_addDotTransition(TimedTransition& t) {
 }
 
 /////////////////////////////////////////////////////////////////
-
-bool SimpleFSM::_hasTransition(Transition t) const {
-  for (int i = 0; i < num_standard; i++) {
-    if (transitions[i].from == t.from && transitions[i].to == t.to && transitions[i].event_id == t.event_id) return true;      
-  }
-  return false;
-} 
-
-/////////////////////////////////////////////////////////////////
-
-bool SimpleFSM::_hasTimedTransition(TimedTransition t) const {
-  for (int i = 0; i < num_timed; i++) {
-    if (timed[i].from == t.from) Serial.println("from");
-    if (timed[i].to == t.to) Serial.println("to");
-    if (timed[i].from == t.from && timed[i].to == t.to && timed[i].interval == t.interval) return true;
-  }
-  return false;
-}
-
