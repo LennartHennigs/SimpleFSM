@@ -29,7 +29,7 @@ void ongoing() {
 
 
 State s[] = {
-  State("red", on_red),
+  State("red", on_red /*, ongoing */),
   State("green", on_green, ongoing)
 };
 
