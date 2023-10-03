@@ -229,19 +229,36 @@ void SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NUL
   // are we ok?
   if (current_state == NULL) return;
   // is it time?
-  if (now < last_run + interval) return;
+  if (!_isTimeForRun(now, interval)) return;
   // are we done yet?
   if (is_finished) return;
   // save the time
   last_run = now;
   // go through the timed events
+  _handleTimedEvents(now);
+  // trigger the on_state event
+  if (current_state->on_state != NULL) current_state->on_state();
+  // trigger the regular tick event
+  if (tick_cb != NULL) tick_cb();
+}
+
+/////////////////////////////////////////////////////////////////
+
+bool SimpleFSM::_isTimeForRun(unsigned long now, int interval) {
+  return now >= last_run + interval;
+}
+
+/////////////////////////////////////////////////////////////////
+
+void SimpleFSM::_handleTimedEvents(unsigned long now) {
   for (int i = 0; i < num_timed; i++) {
     if (timed[i].from != current_state) continue;
-    // start the transition timer
+    // start the transition timer 
     if (timed[i].start == 0) {
       timed[i].start = now;
       continue;
     }
+
     // reached the interval?
     if (now - timed[i].start >= timed[i].interval) {
       if (_transitionTo(&timed[i])) {
@@ -250,10 +267,6 @@ void SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NUL
       }
     }
   }
-  // trigger the on_state event
-  if (current_state->on_state != NULL) current_state->on_state();
-  // trigger the regular tick event
-  if (tick_cb != NULL) tick_cb();
 }
 
 /////////////////////////////////////////////////////////////////

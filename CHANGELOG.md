@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Refactored `run()`
 - Updated `add()` – now multiple transition arrays can be added
 - Added `getTransitionCount()` and `getTimedTransitionCount()` functions as suggested in [PR #7](https://github.com/LennartHennigs/SimpleFSM/pull/7)
 - Fixed `TimedTransitions` constructor as mentioned in [#9](https://github.com/LennartHennigs/SimpleFSM/issues/9)

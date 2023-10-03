@@ -69,6 +69,9 @@ class SimpleFSM {
   bool _hasTransition(Transition t) const;
   bool _hasTimedTransition(TimedTransition t) const;
 
+  bool _isTimeForRun(unsigned long now, int interval);
+  void _handleTimedEvents(unsigned long now);
+
   bool _initFSM();
   bool _transitionTo(AbstractTransition* transition);
   bool _changeToState(State* s, unsigned long now);
