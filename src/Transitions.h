@@ -76,8 +76,8 @@ class TimedTransition : public AbstractTransition {
   void reset();
 
  protected:
-  unsigned long start;
-  unsigned long interval;
+    unsigned long start;
+    unsigned long interval;
 };
 /////////////////////////////////////////////////////////////////
 #endif

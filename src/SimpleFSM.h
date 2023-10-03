@@ -37,6 +37,9 @@ class SimpleFSM {
   void run(int interval = 1000, CallbackFunction tick_cb = NULL);
   void reset();
 
+  int getTransitionCount() const;
+  int getTimedTransitionCount() const;
+  
   bool isFinished() const;
   State* getState() const;
   bool isInState(State* state) const;
@@ -62,6 +65,9 @@ class SimpleFSM {
   CallbackFunction finished_cb = NULL;
 
   String dot_definition = "";
+
+  bool _hasTransition(Transition t) const;
+  bool _hasTimedTransition(TimedTransition t) const;
 
   bool _initFSM();
   bool _transitionTo(AbstractTransition* transition);

@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- Fixed `TimedTranisions` constructor as mentioned in [#9](https://github.com/LennartHennigs/SimpleFSM/issues/9)
+- Updated `add()` – now multiple transition arrays can be added
+- Added `getTransitionCount()` and `getTimedTransitionCount()` functions as suggested in [PR #7](https://github.com/LennartHennigs/SimpleFSM/pull/7)
+- Fixed `TimedTransitions` constructor as mentioned in [#9](https://github.com/LennartHennigs/SimpleFSM/issues/9)
 - Fixed error in `State` constructor as mentioned in [#12](https://github.com/LennartHennigs/SimpleFSM/issues/12)
 - Fixed memory handling in `SimpleFSM` destructor as mentioned in [#8](https://github.com/LennartHennigs/SimpleFSM/issues/8)
 - Updated the button handlers in `MixedTransitions.ino`and `SimpleTransitionWithButton.ino` as mentioned in [#4](https://github.com/LennartHennigs/SimpleFSM/issues/4)
@@ -19,11 +21,11 @@
 
 ## 1.1.0 - 2022-05-30
 
-* Added fix for ESP32 crashes as reported by [Erik](https://github.com/snowrodeo) in [#1](https://github.com/LennartHennigs/SimpleFSM/issues/1)
+- Added fix for ESP32 crashes as reported by [Erik](https://github.com/snowrodeo) in [#1](https://github.com/LennartHennigs/SimpleFSM/issues/1)
 
 ## 1.0.1 - 2022-05-07
 
-- Removed complie warnings for `SimpleFSM.cpp`
+- Removed compile warnings for `SimpleFSM.cpp`
 - Updated `.gitignore`
 
 ## 1.0.0 - 2022-05-07
