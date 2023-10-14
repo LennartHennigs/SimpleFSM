@@ -35,7 +35,7 @@ Button2 btn;
 
 /////////////////////////////////////////////////////////////////
 
-bool connectToWiFi(char* ssid, char* passwd, int timeout_after =-1) {
+bool connectToWiFi(String ssid, String passwd, int timeout_after =-1) {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, passwd);
   // Wait for connection
