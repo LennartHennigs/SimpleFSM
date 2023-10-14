@@ -32,7 +32,7 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
 * Creation of a `Graphviz` source file of your state machine definition
 * TBD: Storage of the current state on files with `LittleFS` or SD card storage (TBD)
   
-To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/master/CHANGELOG.md).
+⚠️ To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/master/CHANGELOG.md).
 
 ## How To Use
 

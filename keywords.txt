@@ -31,3 +31,5 @@ setOnStateHandler	KEYWORD2
 setOnExitHandler	KEYWORD2
 setAsFinal	KEYWORD2
 isFinal	KEYWORD2
+getTimedTransitionCount	KEYWORD2
+getTransitionCount	KEYWORD2

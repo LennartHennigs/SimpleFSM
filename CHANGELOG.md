@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+-
+
+**Note:** Unreleased changes are checked in but not part of an official release (available through the Arduino IDE or PlatfomIO) yet. This allows you to test WiP features and give feedback to them.
+
+## 1.3.0 - 2023-10-14
+
 - Refactored `run()`
 - Updated `add()` – now multiple transition arrays can be added
 - Added `getTransitionCount()` and `getTimedTransitionCount()` functions as suggested in [PR #7](https://github.com/LennartHennigs/SimpleFSM/pull/7)
@@ -10,7 +16,6 @@
 - Fixed memory handling in `SimpleFSM` destructor as mentioned in [#8](https://github.com/LennartHennigs/SimpleFSM/issues/8)
 - Updated the button handlers in `MixedTransitions.ino`and `SimpleTransitionWithButton.ino` as mentioned in [#4](https://github.com/LennartHennigs/SimpleFSM/issues/4)
 
-**Note:** Unreleased changes are checked in but not part of an official release (available through the Arduino IDE or PlatfomIO) yet. This allows you to test WiP features and give feedback to them.
 
 ## 1.2.0 - 2022-12-19
 
