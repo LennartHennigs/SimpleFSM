@@ -62,10 +62,7 @@ int num_transitions = sizeof(transitions) / sizeof(Transition);
 /////////////////////////////////////////////////////////////////
 
 void setup() {
-
-  states["on"] = State("on",   light_on, ongoing, exit_light_on);
-  states["off"] = State("off",  light_off, ongoing, exit_light_off);
-
+    
   Serial.begin(9600);
   while (!Serial) {
     delay(300);
@@ -73,6 +70,9 @@ void setup() {
   Serial.println();
   Serial.println();
   Serial.println("SimpleFSM - Simple Transitions (Light Switch)\n");
+
+  states["on"]  = State("on",   light_on, ongoing, exit_light_on);
+  states["off"] = State("off",  light_off, ongoing, exit_light_off);
     
   fsm.add(transitions, num_transitions);
   fsm.setInitialState(&states["off"]);
