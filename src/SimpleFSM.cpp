@@ -146,7 +146,7 @@ void SimpleFSM::add(Transition newTransitions[], int size) {
   // Allocate or expand storage for transitions with exact size
   Transition* temp = new Transition[num_standard + uniqueCount];
   if (transitions != NULL) {
-    memcpy(temp, transitions, num_standard * sizeof(Transition));
+    memcpy((void*)temp, transitions, num_standard * sizeof(Transition));
     delete[] transitions;
   }
   transitions = temp;
@@ -186,7 +186,7 @@ void SimpleFSM::add(TimedTransition newTransitions[], int size) {
   // Allocate memory or expand existing storage with exact size
   TimedTransition* temp = new TimedTransition[num_timed + uniqueCount];
   if (timed != NULL) {
-    memcpy(temp, timed, num_timed * sizeof(TimedTransition));
+    memcpy((void*)temp, timed, num_timed * sizeof(TimedTransition));
     delete[] timed;
   }
   timed = temp;
