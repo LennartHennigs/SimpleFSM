@@ -6,6 +6,10 @@
 
 **Note:** Unreleased changes are checked in but not part of an official release (available through the Arduino IDE or PlatfomIO) yet. This allows you to test WiP features and give feedback to them.
 
+## 1.3.1 - 2023-10-127
+
+- fixed Wrong type of memcopy argument #16
+
 ## 1.3.0 - 2023-10-14
 
 - Refactored `run()`
