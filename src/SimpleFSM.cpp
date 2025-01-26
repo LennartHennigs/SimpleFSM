@@ -364,6 +364,9 @@ bool SimpleFSM::changeToState(State* s, unsigned long now) {
   return true;
 }
 
+AbstractTransition* SimpleFSM::getLastTransition() const {
+  return last_transition_ptr;  
+}
 /////////////////////////////////////////////////////////////////
 
 String SimpleFSM::getDotDefinition(bool showActive /* = TRUE */ ) {
@@ -381,6 +384,8 @@ bool SimpleFSM::transitionTo(AbstractTransition* transition) {
   if (transition->from->on_exit != NULL) transition->from->on_exit();
   if (transition->on_run_cb != NULL) transition->on_run_cb();
   if (on_transition_cb != NULL) on_transition_cb();
+  // store the transition
+  last_transition_ptr = transition;
   return changeToState(transition->to, millis());
 }
 

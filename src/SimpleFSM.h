@@ -46,6 +46,7 @@ class SimpleFSM {
   State* getState() const;
   bool isInState(State* state) const;
   State* getPreviousState() const;
+  AbstractTransition* getLastTransition() const;
   unsigned long lastTransitioned() const;
   String getDotDefinition(bool showActive = true);
 
@@ -63,6 +64,7 @@ class SimpleFSM {
   bool is_finished = false;
   unsigned long last_run = 0;
   unsigned long last_transition = 0;
+  AbstractTransition* last_transition_ptr = NULL;
 
   State* inital_state = NULL;
   State* current_state = NULL;
