@@ -28,6 +28,7 @@ class SimpleFSM {
 
   void add(Transition t[], int size);
   void add(TimedTransition t[], int size);
+  void add(State s[], int size);
 
   void setInitialState(State* state);
   void setFinishedHandler(CallbackFunction f);
@@ -39,19 +40,24 @@ class SimpleFSM {
 
   int getTransitionCount() const;
   int getTimedTransitionCount() const;
+  int getStateCount() const;
   
   bool isFinished() const;
   State* getState() const;
   bool isInState(State* state) const;
   State* getPreviousState() const;
   unsigned long lastTransitioned() const;
-  String getDotDefinition();
+  String getDotDefinition(bool showActive = true);
 
  protected:
+  bool isSetupOK() const;
+
   int num_timed = 0;
   int num_standard = 0;
+  int num_states = 0;
   Transition* transitions = NULL;
   TimedTransition* timed = NULL;
+  State* states = NULL;
 
   bool is_initialized = false;
   bool is_finished = false;
@@ -66,22 +72,28 @@ class SimpleFSM {
 
   String dot_definition = "";
 
-  bool _isDuplicate(const TimedTransition& transition, const TimedTransition* transitionArray, int arraySize) const;
-  bool _isDuplicate(const Transition& transition, const Transition* transitionArray, int arraySize) const;
+  bool isDuplicate(const TimedTransition& transition, const TimedTransition* transitionArray, int arraySize) const;
+  bool isDuplicate(const Transition& transition, const Transition* transitionArray, int arraySize) const;
 
-  bool _isTimeForRun(unsigned long now, int interval);
-  void _handleTimedEvents(unsigned long now);
-  
-  bool _initFSM();
-  bool _transitionTo(AbstractTransition* transition);
-  bool _changeToState(State* s, unsigned long now);
+  bool isTimeForRun(unsigned long now, int interval);
+  void handleTimedEvents(unsigned long now);
 
-  void _addDotTransition(Transition& t);
-  void _addDotTransition(TimedTransition& t);
-  String _dot_transition(String from, String to, String label, String param);
-  String _dot_inital_state();
-  String _dot_header();
-  String _dot_active_node();
+  State* getStateByName(String name);
+
+  bool initFSM();
+  bool transitionTo(AbstractTransition* transition);
+  bool changeToState(State* s, unsigned long now);
+  void checkAndInitializeTransitions();
+
+  String getDOTHeader();
+  void addDOTTransition(Transition& t);
+  void addDOTTransition(TimedTransition& t);
+  String getDOTTransition(String from, String to, String label, String param);
+  String getDOTInitalState();
+  String getDOTActiveNode();
+
+  bool isStateInArray(State* state, State* stateArray[], int arraySize);
+
 };
 
 /////////////////////////////////////////////////////////////////

@@ -2,13 +2,13 @@
 #include "Transitions.h"
 /////////////////////////////////////////////////////////////////
 
-int AbstractTransition::_next_id = 0;
+int AbstractTransition::next_id = 0;
 
 /////////////////////////////////////////////////////////////////
 
 AbstractTransition::AbstractTransition() {
-  id = _next_id;
-  _next_id++;
+  id = next_id;
+  next_id++;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -63,9 +63,32 @@ Transition::Transition(State* from, State* to, int event_id, CallbackFunction on
 
 /////////////////////////////////////////////////////////////////
 
+TimedTransition::TimedTransition(String from, String to, int interval, CallbackFunction on_run /* = NULL */, String name /* = "" */, GuardCondition guard /*= NULL */) {
+  setup(from, to, interval, on_run, name, guard);
+}
+
+/////////////////////////////////////////////////////////////////
+
+Transition::Transition(String from, String to, int event_id, CallbackFunction on_run /*= NULL */, String name /* = "" */, GuardCondition guard /*= NULL */) {
+  setup(from, to, event_id, on_run, name, guard);
+}
+
+/////////////////////////////////////////////////////////////////
+
 void Transition::setup(State* from, State* to, int event_id, CallbackFunction on_run /* = NULL */, String name /* = "" */, GuardCondition guard /* = NULL */) {
   this->from = from;
   this->to = to;
+  this->event_id = event_id;
+  this->on_run_cb = on_run;
+  this->name = name;
+  this->guard_cb = guard;
+}
+
+/////////////////////////////////////////////////////////////////
+
+void Transition::setup(String from, String to, int event_id, CallbackFunction on_run /* = NULL */, String name /* = "" */, GuardCondition guard /* = NULL */) {
+  this->fromStateName = from;
+  this->toStateName = to;
   this->event_id = event_id;
   this->on_run_cb = on_run;
   this->name = name;
@@ -91,6 +114,17 @@ TimedTransition::TimedTransition(State* from, State* to, int interval, CallbackF
 void TimedTransition::setup(State* from, State* to, int interval, CallbackFunction on_run /* = NULL */, String name /* = "" */, GuardCondition guard /* = NULL */) {
   this->from = from;
   this->to = to;
+  this->interval = interval;
+  this->on_run_cb = on_run;
+  this->name = name;
+  this->guard_cb = guard;
+}
+
+/////////////////////////////////////////////////////////////////
+
+void TimedTransition::setup(String from, String to, int interval, CallbackFunction on_run /* = NULL */, String name /* = "" */, GuardCondition guard /* = NULL */) {
+  this->fromStateName = from;
+  this->toStateName = to;
   this->interval = interval;
   this->on_run_cb = on_run;
   this->name = name;
