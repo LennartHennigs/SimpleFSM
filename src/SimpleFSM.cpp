@@ -65,7 +65,7 @@ void SimpleFSM::reset() {
   is_finished = false;
   last_run = 0;
   last_transition = 0;
-  setInitialState(inital_state);
+  setInitialState(initial_state);
   current_state = NULL;
   prev_state = NULL;
 
@@ -77,7 +77,7 @@ void SimpleFSM::reset() {
 /////////////////////////////////////////////////////////////////
 
 void SimpleFSM::setInitialState(State* state) {
-  inital_state = state;
+  initial_state = state;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -344,7 +344,7 @@ bool SimpleFSM::initFSM() {
   if (is_initialized) return false;
   checkAndInitializeTransitions();
   is_initialized = true;
-  return changeToState(inital_state, millis());
+  return changeToState(initial_state, millis());
 }
 
 /////////////////////////////////////////////////////////////////
@@ -370,7 +370,7 @@ AbstractTransition* SimpleFSM::getLastTransition() const {
 /////////////////////////////////////////////////////////////////
 
 String SimpleFSM::getDotDefinition(bool showActive /* = TRUE */ ) {
-  return "digraph G {\n" + getDOTHeader() + dot_definition + (showActive ? getDOTActiveNode() : "") + getDOTInitalState() + "}\n";
+  return "digraph G {\n" + getDOTHeader() + dot_definition + (showActive ? getDOTActiveNode() : "") + getDOTInitialState() + "}\n";
 }
 
 /////////////////////////////////////////////////////////////////
@@ -397,8 +397,8 @@ String SimpleFSM::getDOTTransition(String from, String to, String label, String 
 
 /////////////////////////////////////////////////////////////////
 
-String SimpleFSM::getDOTInitalState() {
-  return inital_state ? "\t\"" + inital_state->getName() + "\" [style=filled fontcolor=white fillcolor=black];\n\n" : "";
+String SimpleFSM::getDOTInitialState() {
+  return initial_state ? "\t\"" + initial_state->getName() + "\" [style=filled fontcolor=white fillcolor=black];\n\n" : "";
 }
 
 /////////////////////////////////////////////////////////////////

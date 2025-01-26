@@ -70,7 +70,7 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
   };
   ```
 
-* The inital state **must** of the state machine must be defined – either via the constructor or the `setup()` function or via the `setInitialState()` function
+* The initial state **must** of the state machine must be defined – either via the constructor or the `setup()` function or via the `setInitialState()` function
 * None, one, or multiple states can be defined as an end state via `setAsFinal()`
 * For the full `State` class definition see [State.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/State.h)
 
@@ -245,7 +245,7 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
 
 ## Notes
 
-* This libary is heavily inspiried by the [Arduino-fsm](https://github.com/jonblack/arduino-fsm) library created by [Jon Black](https://github.com/jonblack). I initally used some of his as a base. Without Jon's work this library would not exist.
+* This library is heavily inspired by the [Arduino-fsm](https://github.com/jonblack/arduino-fsm) library created by [Jon Black](https://github.com/jonblack). I initially used some of his as a base. Without Jon's work this library would not exist.
 * To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/master/CHANGELOG.md).
 * And if you find this library helpful, please consider giving it a star at [GitHub](https://github.com/LennartHennigs/SimpleFSM). Thanks!
 

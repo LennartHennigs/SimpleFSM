@@ -66,7 +66,7 @@ class SimpleFSM {
   unsigned long last_transition = 0;
   AbstractTransition* last_transition_ptr = NULL;
 
-  State* inital_state = NULL;
+  State* initial_state = NULL;
   State* current_state = NULL;
   State* prev_state = NULL;
   CallbackFunction on_transition_cb = NULL;
@@ -91,7 +91,7 @@ class SimpleFSM {
   void addDOTTransition(Transition& t);
   void addDOTTransition(TimedTransition& t);
   String getDOTTransition(String from, String to, String label, String param);
-  String getDOTInitalState();
+  String getDOTInitialState();
   String getDOTActiveNode();
 
   bool isStateInArray(State* state, State* stateArray[], int arraySize);
