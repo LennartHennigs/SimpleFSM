@@ -1,10 +1,24 @@
 # Changelog
 
+**Note:** Unreleased changes are checked in but not part of an official release (available through the Arduino IDE or PlatfomIO) yet. This allows you to test WiP features and give feedback to them.
+
 ## Unreleased
 
--
-
-**Note:** Unreleased changes are checked in but not part of an official release (available through the Arduino IDE or PlatfomIO) yet. This allows you to test WiP features and give feedback to them.
+- can now add state names to FSM via `add(State s[], int size)` - **is this mandatory** ?
+  - to check whether names are unique
+  - to determine if in end state
+- added `getStateByName()`
+- added `getLastTransition()`
+- added `getStateCount()`
+- renamed protected functions
+  - removed trailing `_`for `_initFSM()`, `_transitionTo()`, `_isDuplicate()`, `_addDotTransition()`, `_isTimeForRun()`, `_handleTimedEvents()`, `_changeToState()`
+  - renamed `_dot_initial_state()` to `getDOTInitialState()`
+  - renamed `_dot_active_node()` to `getDOTActiveNode()`
+  - renamed `_dot_header()` to `getDOTHeader()`
+- updated `getDotDefinition(bool showActive /* = TRUE */ )`
+- added protected functions
+  - `isSetupOK()`
+  - `checkAndInitializeTransitions()`
 
 ## 1.3.1 - 2024-10-24
 
@@ -19,7 +33,6 @@
 - Fixed error in `State` constructor as mentioned in [#12](https://github.com/LennartHennigs/SimpleFSM/issues/12)
 - Fixed memory handling in `SimpleFSM` destructor as mentioned in [#8](https://github.com/LennartHennigs/SimpleFSM/issues/8)
 - Updated the button handlers in `MixedTransitions.ino`and `SimpleTransitionWithButton.ino` as mentioned in [#4](https://github.com/LennartHennigs/SimpleFSM/issues/4)
-
 
 ## 1.2.0 - 2022-12-19
 
