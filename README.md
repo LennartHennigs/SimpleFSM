@@ -3,7 +3,7 @@
 Arduino/ESP library to simplify setting up and running a state machine.
 
 * Author: Lennart Hennigs (<https://www.lennarthennigs.de>)
-* Copyright (C) 2023 Lennart Hennigs.
+* Copyright (C) 2022-2025 Lennart Hennigs.
 * Released under the MIT license.
 
 ## Description
@@ -258,7 +258,7 @@ Or download the ZIP archive (<https://github.com/lennarthennigs/SimpleFSM/zipbal
 
 MIT License
 
-Copyright (c) 2023 Lennart Hennigs
+Copyright (c) 2025 Lennart Hennigs
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
