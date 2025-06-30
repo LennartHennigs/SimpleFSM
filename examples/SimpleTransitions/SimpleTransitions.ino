@@ -84,6 +84,7 @@ void loop() {
   // better than using delay() as this won't block the loop()
   if (fsm.lastTransitioned() > 4000) {
     fsm.trigger(light_switch_flipped);
+    Serial.println(fsm.getLastTransition()->getName());
   }
 }
 
