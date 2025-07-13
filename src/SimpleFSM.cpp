@@ -45,8 +45,8 @@ int SimpleFSM::getStateCount() const {
 
 State* SimpleFSM::getStateByName(String name) {
   for (int i = 0; i < num_states; ++i) {
-    if (states[i].getName() == name) {
-      return &states[i];
+    if (states[i]->getName() == name) {
+      return states[i];
     } 
   }
   return NULL;
@@ -54,9 +54,10 @@ State* SimpleFSM::getStateByName(String name) {
 
 /////////////////////////////////////////////////////////////////
 
-void SimpleFSM::add(State states[], int size) {
-  this->states = states;
-  num_states = size;
+void SimpleFSM::add(State* newStates[], int size) {
+  for (int i = 0; i < size; ++i) {
+    addUniqueState(newStates[i]);
+  }
 }
 
 /////////////////////////////////////////////////////////////////
@@ -120,27 +121,35 @@ void SimpleFSM::setTransitionHandler(CallbackFunction f) {
 
 /////////////////////////////////////////////////////////////////
 
+// Change: states is now an array of State* (pointers), not State objects
+// Add a state to the global states array if not already present
+void SimpleFSM::addUniqueState(State* state) {
+  if (state == nullptr) return;
+  for (int i = 0; i < num_states; i++) {
+    if (states[i] == state) return;
+  }
+  // Expand the states array
+  State** temp = new State*[num_states + 1];
+  if (states != NULL) {
+    memcpy((void*)temp, states, num_states * sizeof(State*));
+    delete[] states;
+  }
+  temp[num_states] = state;
+  states = temp;
+  num_states++;
+}
+
 void SimpleFSM::add(Transition newTransitions[], int size) {
   // Count the number of unique transitions
   int uniqueCount = 0;
-  State* uniqueStates[size * 2]; // Maximum possible unique states
-  int uniqueStateCount = 0;
-  
   for (int i = 0; i < size; ++i) {
     if (!isDuplicate(newTransitions[i], transitions, num_standard) && 
         !isDuplicate(newTransitions[i], newTransitions, i)) {
       uniqueCount++;
     }
-    // Count unique states
-    // Check and add 'from' state if it's unique
-    if (!isStateInArray(newTransitions[i].from, uniqueStates, uniqueStateCount)) {
-      uniqueStates[uniqueStateCount++] = newTransitions[i].from;
-    }
-    
-    // Check and add 'to' state if it's unique
-    if (!isStateInArray(newTransitions[i].to, uniqueStates, uniqueStateCount)) {
-      uniqueStates[uniqueStateCount++] = newTransitions[i].to;
-    }
+    // Add unique states globally
+    addUniqueState(newTransitions[i].from);
+    addUniqueState(newTransitions[i].to);
   }
   // Allocate or expand storage for transitions with exact size
   Transition* temp = new Transition[num_standard + uniqueCount];
@@ -163,33 +172,19 @@ void SimpleFSM::add(Transition newTransitions[], int size) {
       num_standard++;
     }
   }
-  // Store the number of unique states
-  num_states += uniqueStateCount;
 }
-
-/////////////////////////////////////////////////////////////////
 
 void SimpleFSM::add(TimedTransition newTransitions[], int size) {
   // Count the number of unique transitions
   int uniqueCount = 0;
-  State* uniqueStates[size * 2]; // Maximum possible unique states
-  int uniqueStateCount = 0;
-
   for (int i = 0; i < size; ++i) {
     if (!isDuplicate(newTransitions[i], timed, num_timed) && 
         !isDuplicate(newTransitions[i], newTransitions, i)) {
       uniqueCount++;
     }
-
-    // Check and add 'from' state if it's unique
-    if (!isStateInArray(newTransitions[i].from, uniqueStates, uniqueStateCount)) {
-      uniqueStates[uniqueStateCount++] = newTransitions[i].from;
-    }
-    
-    // Check and add 'to' state if it's unique
-    if (!isStateInArray(newTransitions[i].to, uniqueStates, uniqueStateCount)) {
-      uniqueStates[uniqueStateCount++] = newTransitions[i].to;
-    }
+    // Add unique states globally
+    addUniqueState(newTransitions[i].from);
+    addUniqueState(newTransitions[i].to);
   }
   // Allocate memory or expand existing storage with exact size
   TimedTransition* temp = new TimedTransition[num_timed + uniqueCount];
@@ -212,8 +207,6 @@ void SimpleFSM::add(TimedTransition newTransitions[], int size) {
       num_timed++;
     }
   }
-
-  num_states += uniqueStateCount;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -327,6 +320,7 @@ void SimpleFSM::handleTimedEvents(unsigned long now) {
 }
 
 /////////////////////////////////////////////////////////////////
+
 void SimpleFSM::checkAndInitializeTransitions() {
   for (int i=0; i < num_standard; i++) {
     if (transitions[i].fromStateName != "") transitions[i].from = getStateByName(transitions[i].fromStateName);
@@ -359,6 +353,12 @@ bool SimpleFSM::changeToState(State* s, unsigned long now) {
   // save the time
   last_run = now;
   last_transition = now;
+  // Reset timers for timed transitions from the new state
+  for (int i = 0; i < num_timed; i++) {
+    if (timed[i].from == current_state) {
+      timed[i].start = 0;
+    }
+  }
   // is this the end?
   if (s->is_final && finished_cb != NULL) finished_cb();
   if (s->is_final) is_finished = true;
