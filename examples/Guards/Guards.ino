@@ -45,16 +45,15 @@ void tick() {
 
 /////////////////////////////////////////////////////////////////
 
-State s[] = {
-  State("counting",   counting),
-  State("exploding",  boom)
-};
+
+State s_counting("counting", counting);
+State s_exploding("exploding", boom);
+State* states[] = { &s_counting, &s_exploding };
 
 TimedTransition timedTransitions[] = {
-  TimedTransition(&s[0], &s[0], 1000, NULL, "", not_zero_yet),
-  TimedTransition(&s[0], &s[1], 1000, NULL, "", zero_yet)
+  TimedTransition(states[0], states[0], 1000, NULL, "", not_zero_yet),
+  TimedTransition(states[0], states[1], 1000, NULL, "", zero_yet)
 };
-
 int num_timed = sizeof(timedTransitions) / sizeof(TimedTransition);
 
 /////////////////////////////////////////////////////////////////
@@ -69,9 +68,9 @@ void setup() {
     
   fsm.add(timedTransitions, num_timed);
   // initial state  
-  fsm.setInitialState(&s[0]);
-    // final state    
-  s[1].setAsFinal(true);
+  fsm.setInitialState(states[0]);
+  // final state    
+  states[1]->setAsFinal(true);
   fsm.setFinishedHandler(finished); 
 }
 

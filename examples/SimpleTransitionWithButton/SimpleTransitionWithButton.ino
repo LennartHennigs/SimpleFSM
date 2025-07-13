@@ -50,18 +50,18 @@ void ongoing() {
 
 /////////////////////////////////////////////////////////////////
 
-State s[] = {
-  State("on",   light_on,   ongoing,  exit_light_on),
-  State("off",  light_off,  NULL,     exit_light_off)
-};
+
+State s_on("on", light_on, ongoing, exit_light_on);
+State s_off("off", light_off, NULL, exit_light_off);
+State* states[] = { &s_on, &s_off };
 
 enum triggers {
   light_switch_flipped = 1  
 };
 
 Transition transitions[] = {
-  Transition(&s[0], &s[1], light_switch_flipped, on_to_off),
-  Transition(&s[1], &s[0], light_switch_flipped, off_to_on)
+  Transition(states[0], states[1], light_switch_flipped, on_to_off),
+  Transition(states[1], states[0], light_switch_flipped, off_to_on)
 };
 
 int num_transitions = sizeof(transitions) / sizeof(Transition);
@@ -69,7 +69,7 @@ int num_transitions = sizeof(transitions) / sizeof(Transition);
 /////////////////////////////////////////////////////////////////
 
 void button_handler(Button2 &btn) {
-  if (fsm.getState() == &s[0]) Serial.println();
+  if (fsm.getState() == states[0]) Serial.println();
   
   Serial.println("BUTTON: I was flipped");
   fsm.trigger(light_switch_flipped);
@@ -88,7 +88,7 @@ void setup() {
     
   fsm.add(transitions, num_transitions);
   
-  fsm.setInitialState(&s[1]);
+  fsm.setInitialState(states[1]);
 
   btn.begin(BUTTON_PIN);
   btn.setTapHandler(button_handler);  
