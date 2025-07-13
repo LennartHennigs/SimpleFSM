@@ -228,11 +228,28 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
 * Currently guard functions and end states are not shown in the graph
 * See [MixedTransitionsBrowser.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitionsBrowser/MixedTransitionsBrowser.ino) to learn how to run a webserver to show the Graphviz diagram of your state machine
 
+### Utility Helpers for Many-to-One Transitions
+
+To easily create transitions from multiple source states to a single target state, use the helpers in `FSMTransitionUtils.h`:
+
+```c++
+#include "FSMTransitionUtils.h"
+
+// Regular transitions
+createManyToOneTransitions(sources, num_sources, target, event_id, out_array);
+
+// Timed transitions
+createManyToOneTimedTransitions(sources, num_sources, target, interval, out_array);
+```
+
+See `ManyToOneTransitionExample.ino` for a complete usage example.
+
 ## Class Definitions
 
 * [State.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/State.h)
 * [Transitions.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/Transitions.h) for the class definition of both transitions
 * [SimpleFSM](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/SimpleFSM.h)
+* [FSMTransitionUtils.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/FSMTransitionUtils.h) - utility helpers for generating many-to-one transitions
 
 ## Examples
 
@@ -242,6 +259,7 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
 * [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino) - regular and timed transitions
 * [MixedTransitionsBrowser.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitionsBrowser/MixedTransitionsBrowser.ino) - creates a webserver to show the Graphviz diagram of the state machine
 * [Guards.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/Guards/Guards.ino) - showing how to define guard functions
+* [ManyToOneTransitionExample.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/ManyToOneTransitionExample/ManyToOneTransitionExample.ino) - demonstrates utility helpers for creating many-to-one transitions
 
 ## Notes
 

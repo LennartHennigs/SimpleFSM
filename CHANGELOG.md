@@ -3,6 +3,8 @@
 **Note:** Unreleased changes are checked in but not part of an official release (available through the Arduino IDE or PlatfomIO) yet. This allows you to test WiP features and give feedback to them.
 
 ## Unreleased
+- Added `FSMTransitionUtils.h` utility header with helper functions for generating many-to-one regular and timed transitions (see #26).
+- Added `ManyToOneTransitionExample.ino` to demonstrate usage of these helpers (see #26).
 - Breaking API change: FSM now requires states to be passed as arrays of pointers (`State*[]`), not arrays of objects. All examples updated accordingly.
 - Fixed bug: Timed transitions now correctly reset their timer on state re-entry (#25).
 - Improved pointer safety and memory management for states and transitions.
