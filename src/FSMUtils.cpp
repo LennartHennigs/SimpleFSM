@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////
 // FSMTransitionUtils.cpp - Utility functions for SimpleFSM
 /////////////////////////////////////////////////////////////////
-#include "FSMTransitionUtils.h"
+#include "FSMUtils.h"
 
 /////////////////////////////////////////////////////////////////
-void createManyToOneTransitions(
+void FSMUtils::createManyToOneTransitions(
     State* sources[], int num_sources,
     State* target,
     int event_id,
@@ -19,7 +19,7 @@ void createManyToOneTransitions(
 }
 
 /////////////////////////////////////////////////////////////////
-void createManyToOneTimedTransitions(
+void FSMUtils::createManyToOneTimedTransitions(
     State* sources[], int num_sources,
     State* target,
     int interval,

@@ -2,7 +2,7 @@
 // ManyToOneTransitionExample.ino - Demonstrates utility helpers for many-to-one transitions
 /////////////////////////////////////////////////////////////////
 #include "SimpleFSM.h"
-#include "FSMTransitionUtils.h"
+#include "FSMUtils.h"
 
 /////////////////////////////////////////////////////////////////
 #define SERIAL_SPEED 115200
@@ -26,24 +26,10 @@ State home("Home", on_home);
 State* screens[] = { &s1, &s2, &s3 };
 
 /////////////////////////////////////////////////////////////////
-// Regular transitions: All screens go to Home on HOME_EVENT
+
 Transition homeTransitions[3];
-// Minimal usage (only required arguments)
-createManyToOneTransitions(screens, 3, &home, HOME_EVENT, homeTransitions);
-
-// Example with optional parameters
-// Uncomment to use a custom callback, name, or guard
-// createManyToOneTransitions(screens, 3, &home, HOME_EVENT, homeTransitions, NULL, "GoHome", NULL);
-
-/////////////////////////////////////////////////////////////////
-// Timed transitions: All screens go to Home after TIME_TO_HOME ms
 TimedTransition timedHomeTransitions[3];
-// Minimal usage (only required arguments)
-createManyToOneTimedTransitions(screens, 3, &home, TIME_TO_HOME, timedHomeTransitions);
 
-// Example with optional parameters
-// Uncomment to use a custom callback, name, or guard
-// createManyToOneTimedTransitions(screens, 3, &home, TIME_TO_HOME, timedHomeTransitions, NULL, "TimeoutToHome", NULL);
 
 /////////////////////////////////////////////////////////////////
 void setup() {
@@ -51,6 +37,9 @@ void setup() {
   while (!Serial) { delay(300); }
   Serial.println();
   Serial.println("SimpleFSM - Many-to-One Transition Example\n");
+
+  FSMUtils::createManyToOneTransitions(screens, 3, &home, HOME_EVENT, homeTransitions);
+  FSMUtils::createManyToOneTimedTransitions(screens, 3, &home, TIME_TO_HOME, timedHomeTransitions);
 
   fsm.add(homeTransitions, 3);
   fsm.add(timedHomeTransitions, 3);
