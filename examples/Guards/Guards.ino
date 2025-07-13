@@ -51,8 +51,8 @@ State s[] = {
 };
 
 TimedTransition timedTransitions[] = {
-  TimedTransition(&s[0], &s[0], 1000, NULL, "", not_zero_yet)
-  TimedTransition(&s[0], &s[1], 1000, NULL, "", zero_yet),
+  TimedTransition(&s[0], &s[0], 1000, NULL, "", not_zero_yet),
+  TimedTransition(&s[0], &s[1], 1000, NULL, "", zero_yet)
 };
 
 int num_timed = sizeof(timedTransitions) / sizeof(TimedTransition);
