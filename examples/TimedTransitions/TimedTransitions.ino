@@ -10,6 +10,13 @@
 
 /////////////////////////////////////////////////////////////////
 
+#define SERIAL_SPEED 115200
+
+#define TIME_TO_RED 6000
+#define TIME_TO_GREEN 4000
+
+/////////////////////////////////////////////////////////////////
+
 SimpleFSM fsm;
 
 /////////////////////////////////////////////////////////////////
@@ -34,8 +41,8 @@ State s[] = {
 };
 
 TimedTransition timedTransitions[] = {
-  TimedTransition(&s[0], &s[1], 6000),
-  TimedTransition(&s[1], &s[0], 4000),
+  TimedTransition(&s[0], &s[1], TIME_TO_RED),
+  TimedTransition(&s[1], &s[0], TIME_TO_GREEN,
 };
 
 int num_timed = sizeof(timedTransitions) / sizeof(TimedTransition);
@@ -43,7 +50,7 @@ int num_timed = sizeof(timedTransitions) / sizeof(TimedTransition);
 /////////////////////////////////////////////////////////////////
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(SERIAL_SPEED);
   while (!Serial) {
     delay(300);
   }
