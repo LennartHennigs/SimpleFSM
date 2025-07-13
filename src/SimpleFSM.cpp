@@ -18,8 +18,9 @@ SimpleFSM::SimpleFSM(State* initial_state) {
 /////////////////////////////////////////////////////////////////
 
 SimpleFSM::~SimpleFSM() {
-  transitions = NULL;
-  timed = NULL;
+  if (states) delete[] states;
+  if (transitions) delete[] transitions;
+  if (timed) delete[] timed;
 }
 
 /////////////////////////////////////////////////////////////////
