@@ -139,9 +139,9 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
 
   ```c++
   TimedTransition timedTransitions[] = {
-    TimedTransition(&s[0], &s[1], 6000),
-    TimedTransition(&s[1], &s[0], 4000),
-    TimedTransition(&s[2], &s[1], 2000)
+    TimedTransition(states[0], states[1], 6000),
+    TimedTransition(states[1], states[0], 4000),
+    TimedTransition(states[2], states[1], 2000)
   };
   ```
 
@@ -156,9 +156,9 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
 
   ```c++
   TimedTransition timedTransitions[] = {
-    TimedTransition(&s[0], &s[1], 1000, NULL, "", zero_yet),
-    TimedTransition(&s[0], &s[0], 1000, NULL, "", not_zero_yet)
-  };  
+    TimedTransition(states[0], states[1], 1000, NULL, "", zero_yet),
+    TimedTransition(states[0], states[0], 1000, NULL, "", not_zero_yet)
+  };
 
   bool not_zero_yet() {
     return countdown != 0;

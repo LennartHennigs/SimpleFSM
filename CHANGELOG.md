@@ -3,10 +3,17 @@
 **Note:** Unreleased changes are checked in but not part of an official release (available through the Arduino IDE or PlatfomIO) yet. This allows you to test WiP features and give feedback to them.
 
 ## Unreleased
+- Breaking API change: FSM now requires states to be passed as arrays of pointers (`State*[]`), not arrays of objects. All examples updated accordingly.
+- Fixed bug: Timed transitions now correctly reset their timer on state re-entry (#25).
+- Improved pointer safety and memory management for states and transitions.
+- Added comprehensive AUnit test suite for FSM, transitions, guards, and callbacks.
+- Exposed protected FSM internals for testing via friend class (`FSMTestHelper`).
+- Updated all example sketches to use pointer arrays for state management.
+- Improved documentation and README to reflect new pointer-based API and usage patterns.
 
-- can now add state names to FSM via `add(State s[], int size)` - **is this mandatory** ?
-  - to check whether names are unique
-  - to determine if in end state
+- can now add state names to FSM via `add(State* states[], int size)` (pointer array API)
+  - checks whether names are unique
+  - determines if in end state
 - added `getStateByName()`
 - added `getLastTransition()`
 - added `getStateCount()`
