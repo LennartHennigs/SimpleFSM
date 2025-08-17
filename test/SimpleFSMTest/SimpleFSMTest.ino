@@ -180,6 +180,57 @@ test(SimpleFSM, IsInState) {
   assertFalse(fsm.isInState(&s1));
 }
 
+// --- Test 11: Memory Safety and Bounds Checking ---
+test(SimpleFSM, MemorySafetyBoundsChecking) {
+  SimpleFSM fsm;
+  
+  // Test NULL pointer handling
+  FSMError result = fsm.add((Transition*)nullptr, 1);
+  assertEqual(result, FSMError::INVALID_PARAMETER);
+  
+  result = fsm.add((TimedTransition*)nullptr, 1);
+  assertEqual(result, FSMError::INVALID_PARAMETER);
+  
+  result = fsm.add((State**)nullptr, 1);
+  assertEqual(result, FSMError::INVALID_PARAMETER);
+  
+  // Test invalid size
+  Transition validTransition(&s1, &s2, EVT_1);
+  result = fsm.add(&validTransition, 0);
+  assertEqual(result, FSMError::INVALID_PARAMETER);
+  
+  result = fsm.add(&validTransition, -1);
+  assertEqual(result, FSMError::INVALID_PARAMETER);
+  
+  // Test successful addition
+  result = fsm.add(&validTransition, 1);
+  assertEqual(result, FSMError::OK);
+  assertFalse(fsm.hasError());
+}
+
+// --- Test 12: Error State Management ---
+test(SimpleFSM, ErrorStateManagement) {
+  SimpleFSM fsm;
+  
+  // Initially no error
+  assertEqual(fsm.getLastError(), FSMError::OK);
+  assertFalse(fsm.hasError());
+  
+  // Trigger an error
+  fsm.add((Transition*)nullptr, 1);
+  assertTrue(fsm.hasError());
+  assertEqual(fsm.getLastError(), FSMError::INVALID_PARAMETER);
+  
+  // Error string should be meaningful
+  const char* errorStr = fsm.getErrorString(FSMError::INVALID_PARAMETER);
+  assertTrue(strlen(errorStr) > 0);
+  
+  // Reset should clear error
+  fsm.reset();
+  assertEqual(fsm.getLastError(), FSMError::OK);
+  assertFalse(fsm.hasError());
+}
+
 // --- End of tests ---
 
 void setup() {
