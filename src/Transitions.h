@@ -15,6 +15,11 @@ typedef void (*CallbackFunction)();
 typedef bool (*GuardCondition)();
 
 /////////////////////////////////////////////////////////////////
+// Constants for transition initialization
+static constexpr int DEFAULT_EVENT_ID = 0;
+static constexpr unsigned long DEFAULT_TIMER_VALUE = 0;
+
+/////////////////////////////////////////////////////////////////
 // abstract parent class for Transition and TimedTransition
 
 class AbstractTransition {
