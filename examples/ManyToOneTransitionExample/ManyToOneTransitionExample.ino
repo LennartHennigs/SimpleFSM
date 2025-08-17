@@ -8,6 +8,7 @@
 #define SERIAL_SPEED 115200
 #define HOME_EVENT 1
 #define TIME_TO_HOME 5000
+#define HOME_TRIGGER_INTERVAL_MS 10000
 
 /////////////////////////////////////////////////////////////////
 SimpleFSM fsm;
@@ -51,7 +52,7 @@ void loop() {
   fsm.run();
   // Simulate HOME_EVENT trigger every 10 seconds
   static unsigned long lastTrigger = 0;
-  if (millis() - lastTrigger > 10000) {
+  if (millis() - lastTrigger > HOME_TRIGGER_INTERVAL_MS) {
     fsm.trigger(HOME_EVENT);
     lastTrigger = millis();
   }

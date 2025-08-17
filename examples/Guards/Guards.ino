@@ -12,7 +12,14 @@
 
 /////////////////////////////////////////////////////////////////
 
-int countdown = 6;
+// Constants for timing and initialization
+#define SERIAL_SPEED 9600
+#define COUNTDOWN_INTERVAL_MS 1000
+#define INITIAL_COUNTDOWN_VALUE 6
+
+/////////////////////////////////////////////////////////////////
+
+int countdown = INITIAL_COUNTDOWN_VALUE;
 
 SimpleFSM fsm;
 
@@ -51,15 +58,15 @@ State s_exploding("exploding", boom);
 State* states[] = { &s_counting, &s_exploding };
 
 TimedTransition timedTransitions[] = {
-  TimedTransition(states[0], states[0], 1000, NULL, "", not_zero_yet),
-  TimedTransition(states[0], states[1], 1000, NULL, "", zero_yet)
+  TimedTransition(states[0], states[0], COUNTDOWN_INTERVAL_MS, NULL, "", not_zero_yet),
+  TimedTransition(states[0], states[1], COUNTDOWN_INTERVAL_MS, NULL, "", zero_yet)
 };
 int num_timed = sizeof(timedTransitions) / sizeof(TimedTransition);
 
 /////////////////////////////////////////////////////////////////
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(SERIAL_SPEED);
   while (!Serial) {
     delay(300);
   }
@@ -77,7 +84,7 @@ void setup() {
 /////////////////////////////////////////////////////////////////
 
 void loop() {
-  fsm.run(1000, tick);
+  fsm.run(COUNTDOWN_INTERVAL_MS, tick);
 }
 
 /////////////////////////////////////////////////////////////////

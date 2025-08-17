@@ -12,6 +12,8 @@
 /////////////////////////////////////////////////////////////////
 
 #define BUTTON_PIN  39
+#define SERIAL_SPEED 9600
+#define FSM_RUN_INTERVAL_MS 1000
 
 /////////////////////////////////////////////////////////////////
 
@@ -78,7 +80,7 @@ void button_handler(Button2 &btn) {
 /////////////////////////////////////////////////////////////////
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(SERIAL_SPEED);
   while (!Serial) {
     delay(300);
   }
@@ -97,7 +99,7 @@ void setup() {
 /////////////////////////////////////////////////////////////////
 
 void loop() {
-    fsm.run(1000);
+    fsm.run(FSM_RUN_INTERVAL_MS);
     btn.loop();
 }
 

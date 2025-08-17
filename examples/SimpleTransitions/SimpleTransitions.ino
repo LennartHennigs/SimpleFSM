@@ -10,6 +10,17 @@
 #include "SimpleFSM.h"
 
 /////////////////////////////////////////////////////////////////
+// Constants
+#define SERIAL_SPEED 9600
+#define LIGHT_SWITCH_INTERVAL_MS 4000
+
+/////////////////////////////////////////////////////////////////
+
+// Constants for timing and serial communication
+#define SERIAL_SPEED 9600
+#define LIGHT_SWITCH_INTERVAL_MS 4000
+
+/////////////////////////////////////////////////////////////////
 
 SimpleFSM fsm;
 
@@ -64,7 +75,7 @@ int num_transitions = sizeof(transitions) / sizeof(Transition);
 /////////////////////////////////////////////////////////////////
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(SERIAL_SPEED);
   while (!Serial) {
     delay(300);
   }
@@ -72,8 +83,16 @@ void setup() {
   Serial.println();
   Serial.println("SimpleFSM - Simple Transitions (Light Switch)\n");
     
-  fsm.add(transitions, num_transitions);
+  // Add transitions with error checking
+  FSMError result = fsm.add(transitions, num_transitions);
+  if (result != FSMError::OK) {
+    Serial.print("Error adding transitions: ");
+    Serial.println(fsm.getErrorString(result));
+    return;
+  }
+  
   fsm.setInitialState(states[1]);
+  Serial.println("FSM initialized successfully");
 }
 
 /////////////////////////////////////////////////////////////////
@@ -82,7 +101,7 @@ void loop() {
   fsm.run();
   // flip the switch every 4 seconds
   // better than using delay() as this won't block the loop()
-  if (fsm.lastTransitioned() > 4000) {
+  if (fsm.lastTransitioned() > LIGHT_SWITCH_INTERVAL_MS) {
     fsm.trigger(light_switch_flipped);
     Serial.println(fsm.getLastTransition()->getName());
   }
