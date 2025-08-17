@@ -20,6 +20,17 @@ typedef bool (*GuardCondition)();
 
 /////////////////////////////////////////////////////////////////
 
+// Error codes for better error handling
+enum class FSMError {
+  OK,
+  OUT_OF_MEMORY,
+  INVALID_PARAMETER,
+  ARRAY_TOO_LARGE,
+  NULL_POINTER
+};
+
+/////////////////////////////////////////////////////////////////
+
 // forward declaration
 class FSMTestHelper;
 
@@ -32,17 +43,17 @@ class SimpleFSM {
     SimpleFSM(State* initial_state);
     ~SimpleFSM();
 
-    void add(Transition t[], int size);
-    void add(TimedTransition t[], int size);
-    void add(State* states[], int size);
-    void addUniqueState(State* state);
+    FSMError add(Transition t[], int size);
+    FSMError add(TimedTransition t[], int size);
+    FSMError add(State* states[], int size);
+    FSMError addUniqueState(State* state);
 
     void setInitialState(State* state);
     void setFinishedHandler(CallbackFunction f);
     void setTransitionHandler(CallbackFunction f);
 
     bool trigger(int event_id);
-    void run(int interval = 1000, CallbackFunction tick_cb = NULL);
+    void run(int interval = DEFAULT_RUN_INTERVAL_MS, CallbackFunction tick_cb = NULL);
     void reset();
 
     int getTransitionCount() const;
@@ -57,20 +68,44 @@ class SimpleFSM {
     unsigned long lastTransitioned() const;
     String getDotDefinition(bool showActive = true);
 
+    // Error handling methods
+    FSMError getLastError() const;
+    bool hasError() const;
+    const char* getErrorString(FSMError error) const;
+
  protected:
+    // Safety limits to prevent excessive memory allocation
+    static constexpr int MAX_TRANSITIONS = 100;
+    static constexpr int MAX_TIMED_TRANSITIONS = 50;
+    static constexpr int MAX_STATES = 50;
+    
+    // Default timing constants
+    static constexpr int DEFAULT_RUN_INTERVAL_MS = 1000;
+    
+    // DOT graph formatting constants
+    static constexpr const char* DOT_NODE_WIDTH = "1.5";
+    static constexpr const char* DOT_PAD_VALUE = "0.5";
+    
+    // Reset/initialization values
+    static constexpr unsigned long TIMESTAMP_RESET_VALUE = 0;
+    static constexpr int INITIAL_ID_VALUE = 0;
+    static constexpr int ARRAY_INCREMENT = 1;
     bool isSetupOK() const;
-    int num_timed = 0;
-    int num_standard = 0;
-    int num_states = 0;
+    int num_timed = INITIAL_ID_VALUE;
+    int num_standard = INITIAL_ID_VALUE;
+    int num_states = INITIAL_ID_VALUE;
     Transition* transitions = NULL;
     TimedTransition* timed = NULL;
     State** states = NULL;
 
     bool is_initialized = false;
     bool is_finished = false;
-    unsigned long last_run = 0;
-    unsigned long last_transition = 0;
+    unsigned long last_run = TIMESTAMP_RESET_VALUE;
+    unsigned long last_transition = TIMESTAMP_RESET_VALUE;
     AbstractTransition* last_transition_ptr = NULL;
+
+    // Error tracking
+    FSMError last_error = FSMError::OK;
 
     State* initial_state = NULL;
     State* current_state = NULL;

@@ -11,8 +11,32 @@ SimpleFSM::SimpleFSM() {
 /////////////////////////////////////////////////////////////////
 
 SimpleFSM::SimpleFSM(State* initial_state) {
-  SimpleFSM();
   setInitialState(initial_state);
+}
+
+/////////////////////////////////////////////////////////////////
+
+FSMError SimpleFSM::getLastError() const {
+  return last_error;
+}
+
+/////////////////////////////////////////////////////////////////
+
+bool SimpleFSM::hasError() const {
+  return last_error != FSMError::OK;
+}
+
+/////////////////////////////////////////////////////////////////
+
+const char* SimpleFSM::getErrorString(FSMError error) const {
+  switch (error) {
+    case FSMError::OK: return "No error";
+    case FSMError::OUT_OF_MEMORY: return "Out of memory";
+    case FSMError::INVALID_PARAMETER: return "Invalid parameter";
+    case FSMError::ARRAY_TOO_LARGE: return "Array size exceeds limits";
+    case FSMError::NULL_POINTER: return "Null pointer provided";
+    default: return "Unknown error";
+  }
 }
 
 /////////////////////////////////////////////////////////////////
@@ -54,10 +78,28 @@ State* SimpleFSM::getStateByName(String name) {
 
 /////////////////////////////////////////////////////////////////
 
-void SimpleFSM::add(State* newStates[], int size) {
-  for (int i = 0; i < size; ++i) {
-    addUniqueState(newStates[i]);
+FSMError SimpleFSM::add(State* newStates[], int size) {
+  // Validate input parameters
+  if (newStates == nullptr || size <= INITIAL_ID_VALUE) {
+    last_error = FSMError::INVALID_PARAMETER;
+    return last_error;
   }
+  
+  // Check bounds before processing
+  if (num_states + size > MAX_STATES) {
+    last_error = FSMError::ARRAY_TOO_LARGE;
+    return last_error;
+  }
+  
+  for (int i = 0; i < size; ++i) {
+    FSMError result = addUniqueState(newStates[i]);
+    if (result != FSMError::OK) {
+      return result;
+    }
+  }
+  
+  last_error = FSMError::OK;
+  return last_error;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -65,8 +107,9 @@ void SimpleFSM::add(State* newStates[], int size) {
 void SimpleFSM::reset() {
   is_initialized = false;
   is_finished = false;
-  last_run = 0;
-  last_transition = 0;
+  last_run = TIMESTAMP_RESET_VALUE;
+  last_transition = TIMESTAMP_RESET_VALUE;
+  last_error = FSMError::OK;  // Reset error state
   setInitialState(initial_state);
   current_state = NULL;
   prev_state = NULL;
@@ -123,13 +166,32 @@ void SimpleFSM::setTransitionHandler(CallbackFunction f) {
 
 // Change: states is now an array of State* (pointers), not State objects
 // Add a state to the global states array if not already present
-void SimpleFSM::addUniqueState(State* state) {
-  if (state == nullptr) return;
-  for (int i = 0; i < num_states; i++) {
-    if (states[i] == state) return;
+FSMError SimpleFSM::addUniqueState(State* state) {
+  if (state == nullptr) {
+    last_error = FSMError::NULL_POINTER;
+    return last_error;
   }
+  
+  // Check if already present
+  for (int i = 0; i < num_states; i++) {
+    if (states[i] == state) {
+      return FSMError::OK; // Already present, not an error
+    }
+  }
+  
+  // Check bounds
+  if (num_states >= MAX_STATES) {
+    last_error = FSMError::ARRAY_TOO_LARGE;
+    return last_error;
+  }
+  
   // Expand the states array
-  State** temp = new State*[num_states + 1];
+  State** temp = new State*[num_states + ARRAY_INCREMENT];
+  if (temp == nullptr) {
+    last_error = FSMError::OUT_OF_MEMORY;
+    return last_error;
+  }
+  
   if (states != NULL) {
     memcpy((void*)temp, states, num_states * sizeof(State*));
     delete[] states;
@@ -137,9 +199,24 @@ void SimpleFSM::addUniqueState(State* state) {
   temp[num_states] = state;
   states = temp;
   num_states++;
+  
+  last_error = FSMError::OK;
+  return last_error;
 }
 
-void SimpleFSM::add(Transition newTransitions[], int size) {
+FSMError SimpleFSM::add(Transition newTransitions[], int size) {
+  // Validate input parameters
+  if (newTransitions == nullptr || size <= INITIAL_ID_VALUE) {
+    last_error = FSMError::INVALID_PARAMETER;
+    return last_error;
+  }
+  
+  // Check bounds - prevent excessive memory allocation
+  if (num_standard + size > MAX_TRANSITIONS) {
+    last_error = FSMError::ARRAY_TOO_LARGE;
+    return last_error;
+  }
+  
   // Count the number of unique transitions
   int uniqueCount = 0;
   for (int i = 0; i < size; ++i) {
@@ -147,22 +224,36 @@ void SimpleFSM::add(Transition newTransitions[], int size) {
         !isDuplicate(newTransitions[i], newTransitions, i)) {
       uniqueCount++;
     }
-    // Add unique states globally
-    addUniqueState(newTransitions[i].from);
-    addUniqueState(newTransitions[i].to);
+    // Add unique states globally - check for errors
+    FSMError stateError = addUniqueState(newTransitions[i].from);
+    if (stateError != FSMError::OK) {
+      return stateError;
+    }
+    stateError = addUniqueState(newTransitions[i].to);
+    if (stateError != FSMError::OK) {
+      return stateError;
+    }
   }
+  
+  // Final bounds check with actual unique count
+  if (num_standard + uniqueCount > MAX_TRANSITIONS) {
+    last_error = FSMError::ARRAY_TOO_LARGE;
+    return last_error;
+  }
+  
   // Allocate or expand storage for transitions with exact size
   Transition* temp = new Transition[num_standard + uniqueCount];
+  if (temp == nullptr) {
+    last_error = FSMError::OUT_OF_MEMORY;
+    return last_error;
+  }
+  
   if (transitions != NULL) {
     memcpy((void*)temp, transitions, num_standard * sizeof(Transition));
     delete[] transitions;
   }
   transitions = temp;
-  // Check if memory allocation was successful
-  if (transitions == NULL) {
-    Serial.print("Out of storage");
-    abort();
-  }
+  
   // Add new transitions, avoiding duplicates
   for (int i = 0; i < size; ++i) {
     if (!isDuplicate(newTransitions[i], transitions, num_standard) && 
@@ -172,9 +263,24 @@ void SimpleFSM::add(Transition newTransitions[], int size) {
       num_standard++;
     }
   }
+  
+  last_error = FSMError::OK;
+  return last_error;
 }
 
-void SimpleFSM::add(TimedTransition newTransitions[], int size) {
+FSMError SimpleFSM::add(TimedTransition newTransitions[], int size) {
+  // Validate input parameters
+  if (newTransitions == nullptr || size <= INITIAL_ID_VALUE) {
+    last_error = FSMError::INVALID_PARAMETER;
+    return last_error;
+  }
+  
+  // Check bounds - prevent excessive memory allocation
+  if (num_timed + size > MAX_TIMED_TRANSITIONS) {
+    last_error = FSMError::ARRAY_TOO_LARGE;
+    return last_error;
+  }
+  
   // Count the number of unique transitions
   int uniqueCount = 0;
   for (int i = 0; i < size; ++i) {
@@ -182,22 +288,36 @@ void SimpleFSM::add(TimedTransition newTransitions[], int size) {
         !isDuplicate(newTransitions[i], newTransitions, i)) {
       uniqueCount++;
     }
-    // Add unique states globally
-    addUniqueState(newTransitions[i].from);
-    addUniqueState(newTransitions[i].to);
+    // Add unique states globally - check for errors
+    FSMError stateError = addUniqueState(newTransitions[i].from);
+    if (stateError != FSMError::OK) {
+      return stateError;
+    }
+    stateError = addUniqueState(newTransitions[i].to);
+    if (stateError != FSMError::OK) {
+      return stateError;
+    }
   }
+  
+  // Final bounds check with actual unique count
+  if (num_timed + uniqueCount > MAX_TIMED_TRANSITIONS) {
+    last_error = FSMError::ARRAY_TOO_LARGE;
+    return last_error;
+  }
+  
   // Allocate memory or expand existing storage with exact size
   TimedTransition* temp = new TimedTransition[num_timed + uniqueCount];
+  if (temp == nullptr) {
+    last_error = FSMError::OUT_OF_MEMORY;
+    return last_error;
+  }
+  
   if (timed != NULL) {
     memcpy((void*)temp, timed, num_timed * sizeof(TimedTransition));
     delete[] timed;
   }
   timed = temp;
-  // Check memory allocation
-  if (timed == NULL) {
-    Serial.print("Out of storage");
-    abort();
-  }
+  
   // Add new transitions while avoiding duplicates
   for (int i = 0; i < size; ++i) {
     if (!isDuplicate(newTransitions[i], timed, num_timed) && 
@@ -207,6 +327,9 @@ void SimpleFSM::add(TimedTransition newTransitions[], int size) {
       num_timed++;
     }
   }
+  
+  last_error = FSMError::OK;
+  return last_error;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -256,7 +379,7 @@ void SimpleFSM::setFinishedHandler(CallbackFunction f) {
 /////////////////////////////////////////////////////////////////
 
 unsigned long SimpleFSM::lastTransitioned() const {
-  return (last_transition == 0) ? 0 : (millis() - last_transition);
+  return (last_transition == TIMESTAMP_RESET_VALUE) ? TIMESTAMP_RESET_VALUE : (millis() - last_transition);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -273,7 +396,7 @@ bool SimpleFSM::isSetupOK() const {
 
 /////////////////////////////////////////////////////////////////
 
-void SimpleFSM::run(int interval /* = 1000 */, CallbackFunction tick_cb /* = NULL */) {
+void SimpleFSM::run(int interval /* = DEFAULT_RUN_INTERVAL_MS */, CallbackFunction tick_cb /* = NULL */) {
   unsigned long now = millis();
   // is the machine set up?
   if (!is_initialized) initFSM();
@@ -411,7 +534,8 @@ String SimpleFSM::getDOTActiveNode() {
 /////////////////////////////////////////////////////////////////
 
 String SimpleFSM::getDOTHeader() {
-  return "\trankdir=LR; pad=0.5\n\tnode [shape=circle fixedsize=true width=1.5];\n";
+  return String("\trankdir=LR; pad=") + DOT_PAD_VALUE + 
+         String("\n\tnode [shape=circle fixedsize=true width=") + DOT_NODE_WIDTH + String("];\n");
 }
 
 /////////////////////////////////////////////////////////////////
