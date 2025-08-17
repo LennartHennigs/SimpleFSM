@@ -4,20 +4,47 @@
 
 ## Unreleased
 
-- Breaking API change
+- Breaking API changes
   - FSM now requires states to be passed as arrays of pointers (`State*[]`), not arrays of objects.
-- Added `FSMTransitionUtils.h` helper class – offers functions to generate many-to-one regular and timed transitions (see #26).
+  - `add()` methods now return `FSMError` instead of `void` for better error handling.
+  - `addUniqueState()` now returns `FSMError` instead of `void`.
+- Added `FSMUtils.h` helper class – offers functions to generate many-to-one regular and timed transitions (see #26).
 - Fixed bugs
   - Timed transitions now correctly reset their timer on state re-entry (see #25).
+  - Fixed constructor bug where `SimpleFSM()` call had no effect in parameterized constructor.
   - Improved pointer safety and memory management for states and transitions.
+- Added memory safety and bounds checking
+  - Implemented configurable maximum limits for states, transitions, and timed transitions.
+  - Added comprehensive input validation for all `add()` methods.
+  - Replaced dangerous `abort()` calls with proper error codes.
+  - Added null pointer checking throughout the API.
+  - Memory allocation failures are now handled gracefully.
+- Added error handling system
+  - New `FSMError` enum for standardized error reporting.
+  - `getLastError()`, `hasError()`, and `getErrorString()` methods.
+  - Error state is automatically reset on `reset()` calls.
+- Improved code maintainability
+  - Replaced magic numbers with meaningful named constants.
+  - Added configuration constants for timing, limits, and DOT formatting.
+  - Enhanced code readability with descriptive constant names.
 - Updated examples
   - Added `ManyToOneTransitionExample.ino` to demonstrate usage new helpers (see #26).
+  - Updated `SimpleTransitions.ino` to demonstrate error handling.
   - Added constants to some examples
   - They now use array of pointers for states
 - Added unit tests
   - Added AUnit tests for FSM, transitions, guards, and callbacks.
+  - Added comprehensive memory safety and error handling tests.
   - Exposed protected FSM internals for testing via friend class (`FSMTestHelper`).
+- Added comprehensive testing infrastructure
+  - New compilation test script (`test/test_compilation.sh`) for automated platform testing.
+  - Tests compilation across ESP8266 (Wemos D1 Mini), ESP32 (M5Stack Core2), and Arduino Nano.
+  - Automatic platform-specific example exclusion handling.
+  - Colored output with detailed error reporting for failed compilations.
 - Improved documentation and README to reflect new pointer-based API and usage patterns.
+  - Added comprehensive migration guide from v1.x to v2.0 in README.md with step-by-step instructions.
+  - Added CLAUDE.md - AI assistant reference guide with Arduino/PlatformIO constraints and best practices.
+  - Enhanced README with migration checklist, before/after code examples, and rationale for changes.
   - checks whether names are unique
   - determines if in end state
 - Added functions

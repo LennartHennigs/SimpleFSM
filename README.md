@@ -48,6 +48,7 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
 * A finite state machine has a defined set of states
 * A state must have a name...
 * ...and can have callback functions for different events (when a state is entered, exited, or stays in a state)
+* Always define your `State` objects outside of functions (globally or as static variables) to ensure they remain valid for the lifetime of the FSM.
 
 ```c++
   State(
@@ -230,10 +231,11 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
 
 ### Utility Helpers for Many-to-One Transitions
 
-To easily create transitions from multiple source states to a single target state, use the helpers in `FSMTransitionUtils.h`:
+To easily create transitions from multiple source states to a single target state, use the helpers in `FSMUtils.h`:
 
 ```c++
-#include "FSMTransitionUtils.h"
+```cpp
+#include "FSMUtils.h"
 
 // Regular transitions
 createManyToOneTransitions(sources, num_sources, target, event_id, out_array);
@@ -249,7 +251,7 @@ See `ManyToOneTransitionExample.ino` for a complete usage example.
 * [State.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/State.h)
 * [Transitions.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/Transitions.h) for the class definition of both transitions
 * [SimpleFSM](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/SimpleFSM.h)
-* [FSMTransitionUtils.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/FSMTransitionUtils.h) - utility helpers for generating many-to-one transitions
+* [FSMUtils.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/FSMUtils.h) - utility helpers for generating many-to-one transitions
 
 ## Examples
 
@@ -261,11 +263,168 @@ See `ManyToOneTransitionExample.ino` for a complete usage example.
 * [Guards.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/Guards/Guards.ino) - showing how to define guard functions
 * [ManyToOneTransitionExample.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/ManyToOneTransitionExample/ManyToOneTransitionExample.ino) - demonstrates utility helpers for creating many-to-one transitions
 
+## Testing
+
+The library includes comprehensive testing infrastructure to ensure compatibility across different Arduino platforms:
+
+### Compilation Testing
+
+A bash script (`test/test_compilation.sh`) automatically tests compilation of all examples across multiple platforms:
+
+* **Wemos D1 Mini** (ESP8266)
+* **M5Stack Core2** (ESP32)
+* **Arduino Nano** (AVR)
+
+**Usage:**
+
+```bash
+cd test
+./test_compilation.sh          # Run all tests
+./test_compilation.sh --help   # Show help and options
+```
+
+**Features:**
+
+* Automatic platform-specific example exclusion (e.g., WiFi examples skip Arduino Nano)
+* Colored output with clear pass/fail indicators
+* Detailed error reporting for failed compilations
+* Summary statistics
+
+**Prerequisites:**
+
+* [arduino-cli](https://arduino.github.io/arduino-cli/) installed and in PATH
+* Required Arduino cores: `esp8266:esp8266`, `esp32:esp32`, `arduino:avr`
+
 ## Notes
 
 * This library is heavily inspired by the [Arduino-fsm](https://github.com/jonblack/arduino-fsm) library created by [Jon Black](https://github.com/jonblack). I initially used some of his as a base. Without Jon's work this library would not exist.
 * To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/master/CHANGELOG.md).
 * And if you find this library helpful, please consider giving it a star at [GitHub](https://github.com/LennartHennigs/SimpleFSM). Thanks!
+
+## Migrating from v1.x to v2.0
+
+⚠️ **Version 2.0 introduces breaking changes** that require code modifications when upgrading from v1.x.
+
+### Key Breaking Changes
+
+1. **State Arrays Must Use Pointers**
+2. **Add Methods Return Error Codes**
+3. **New Memory Safety Limits**
+4. **Constructor Behavior Fixed**
+
+### Step-by-Step Migration Guide
+
+#### 1. Update State Definitions
+
+**Before (v1.x):**
+```cpp
+State states[] = {
+    State("idle", on_idle),
+    State("running", on_running)
+};
+fsm.add(states, 2);  // This won't work in v2.0
+```
+
+**After (v2.0):**
+```cpp
+State states[] = {
+    State("idle", on_idle),
+    State("running", on_running)
+};
+State* state_ptrs[] = { &states[0], &states[1] };
+fsm.add(state_ptrs, 2);  // Use pointer array
+```
+
+#### 2. Add Error Handling
+
+**Before (v1.x):**
+```cpp
+fsm.add(transitions, num_transitions);  // void return
+```
+
+**After (v2.0):**
+```cpp
+FSMError result = fsm.add(transitions, num_transitions);
+if (result != FSMError::OK) {
+    Serial.print("Error: ");
+    Serial.println(fsm.getErrorString(result));
+    // Handle error appropriately
+}
+```
+
+#### 3. Check Memory Limits
+
+v2.0 enforces safety limits:
+- **MAX_STATES**: 50 states maximum
+- **MAX_TRANSITIONS**: 100 regular transitions maximum
+- **MAX_TIMED_TRANSITIONS**: 50 timed transitions maximum
+
+If you exceed these limits, consider breaking your FSM into smaller components.
+
+#### 4. Update Include Statements (if using utilities)
+
+**New in v2.0:**
+```cpp
+#include "FSMUtils.h"  // For many-to-one transition helpers
+```
+
+### Migration Checklist
+
+- [ ] Convert state arrays to use pointers: `State*[]`
+- [ ] Add error checking to all `fsm.add()` calls
+- [ ] Verify your FSM doesn't exceed the new safety limits
+- [ ] Test all state transitions work as expected
+- [ ] Update any custom test code to use new error handling
+
+### Quick Migration Example
+
+**Complete v1.x code:**
+```cpp
+State s1("state1", callback1);
+State s2("state2", callback2);
+State states[] = { s1, s2 };
+
+Transition transitions[] = {
+    Transition(&s1, &s2, EVENT_1)
+};
+
+void setup() {
+    fsm.add(states, 2);
+    fsm.add(transitions, 1);
+    fsm.setInitialState(&s1);
+}
+```
+
+**Migrated v2.0 code:**
+```cpp
+State s1("state1", callback1);
+State s2("state2", callback2);
+State* states[] = { &s1, &s2 };  // ← Pointer array
+
+Transition transitions[] = {
+    Transition(&s1, &s2, EVENT_1)
+};
+
+void setup() {
+    // ← Add error checking
+    if (fsm.add(states, 2) != FSMError::OK) {
+        Serial.println("Failed to add states");
+        return;
+    }
+    if (fsm.add(transitions, 1) != FSMError::OK) {
+        Serial.println("Failed to add transitions");
+        return;
+    }
+    fsm.setInitialState(&s1);
+}
+```
+
+### Why These Changes?
+
+- **Memory Safety**: Prevents crashes from memory overflows
+- **Error Handling**: Makes debugging easier and code more robust
+- **Pointer Arrays**: Fixes memory management issues and improves performance
+- **Production Ready**: Makes the library suitable for production embedded systems
 
 ## How To Install
 
