@@ -120,6 +120,63 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
   fsm.trigger(light_switch_flipped);
   ```
 
+### Global Transitions
+
+Global transitions allow you to define transitions that work from **any state**. You can use either the traditional approach or the new helper functions. They are internally defined as states with a "NULL" source state. Use the helper function to define them
+
+
+```c++
+// Much cleaner and more explicit API:
+fsm.addGlobalTransition(&error_state, EMERGENCY_EVENT);
+fsm.addGlobalTransition(&idle, RESET_EVENT);
+
+// With callbacks:
+fsm.addGlobalTransition(&error_state, EMERGENCY_EVENT, onEmergency);
+
+// Global timed transitions:
+fsm.addGlobalTimedTransition(&sleep_state, 30000);  // Auto-sleep after 30s from any state
+```
+
+**Use Cases:**
+* **Emergency stops**: Transition to a safe state from anywhere
+* **Error handling**: Jump to error state when problems occur
+* **System reset**: Return to initial state from any point
+* **Power management**: Enter sleep mode from any state
+
+**Multiple Global Transitions:**
+
+When you have multiple global transitions:
+* **Same event ID**: Only the **first** matching transition will execute (order matters!)
+* **Different event IDs**: Each can be triggered independently  
+* **Priority**: Transitions are checked in the order they were added to the FSM
+* **Global vs Specific**: If both exist for the same event, the first one added takes priority
+
+⚠️ **Important**: If you add multiple global transitions with the same event ID, only the first one will be triggered. The system will detect this situation but won't prevent it for backward compatibility.
+
+**Example with Helper Functions:**
+
+```c++
+// Define states
+State idle("Idle");
+State running("Running");
+State processing("Processing");
+State error_state("Error");
+
+// Add states to FSM
+State* states[] = {&idle, &running, &processing, &error_state};
+fsm.add(states, 4);
+
+// Regular transitions (between specific states)
+Transition regular_transitions[] = {
+    Transition(&idle, &running, START_EVENT),
+    Transition(&running, &processing, PROCESS_EVENT)
+};
+fsm.add(regular_transitions, 2);
+
+// Global transitions using helper functions (RECOMMENDED)
+fsm.addGlobalTransition(&error_state, ERROR_EVENT);    // Any state -> Error
+```
+
 * See [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitions/SimpleTransitions.ino) and [SimpleTransitionWithButtons.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitionWithButton/SimpleTransitionWithButton.ino) for more details
 
 ### Timed Transitions
@@ -262,6 +319,7 @@ See `ManyToOneTransitionExample.ino` for a complete usage example.
 * [MixedTransitionsBrowser.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitionsBrowser/MixedTransitionsBrowser.ino) - creates a webserver to show the Graphviz diagram of the state machine
 * [Guards.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/Guards/Guards.ino) - showing how to define guard functions
 * [ManyToOneTransitionExample.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/ManyToOneTransitionExample/ManyToOneTransitionExample.ino) - demonstrates utility helpers for creating many-to-one transitions
+* [GlobalTransitionsSimple.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/GlobalTransitionsSimple/GlobalTransitionsSimple.ino) - demonstrates global transitions using NULL as source state for emergency stops and system-wide events
 
 ## Testing
 

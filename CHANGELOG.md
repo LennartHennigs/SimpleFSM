@@ -9,6 +9,15 @@
   - `add()` methods now return `FSMError` instead of `void` for better error handling.
   - `addUniqueState()` now returns `FSMError` instead of `void`.
 - Added `FSMUtils.h` helper class – offers functions to generate many-to-one regular and timed transitions (see #26).
+- Added global transitions feature
+  - Transitions can now use `NULL` as the source state to work from any state.
+  - NEW: Added convenient helper functions for global transitions:
+    - `addGlobalTransition(state, event)` and `addGlobalTransition(state, event, callback)`
+    - `addGlobalTimedTransition(state, interval)` and `addGlobalTimedTransition(state, interval, callback)`
+  - Helper functions provide cleaner, more explicit API than using `NULL` in constructors.
+  - Useful for emergency stops, error handling, and system-wide events.
+  - Works with both regular and timed transitions.
+  - Maintains full backward compatibility with existing code.
 - Fixed bugs
   - Timed transitions now correctly reset their timer on state re-entry (see #25).
   - Fixed constructor bug where `SimpleFSM()` call had no effect in parameterized constructor.

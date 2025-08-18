@@ -84,6 +84,49 @@ Transition transitions[] = {
 };
 ```
 
+#### Global Transitions
+
+**Traditional approach** - Use `NULL` as source state:
+
+```cpp
+// Emergency stop from any state
+Transition(NULL, &emergency_state, EMERGENCY_EVENT);
+
+// Global reset to idle from any state  
+Transition(NULL, &idle_state, RESET_EVENT);
+```
+
+##### NEW: Helper Functions (Recommended)
+
+```cpp
+// Much cleaner and more explicit API:
+fsm.addGlobalTransition(&emergency_state, EMERGENCY_EVENT);
+fsm.addGlobalTransition(&idle_state, RESET_EVENT);
+
+// With callbacks:
+fsm.addGlobalTransition(&emergency_state, EMERGENCY_EVENT, onEmergency);
+
+// Global timed transitions:
+fsm.addGlobalTimedTransition(&sleep_state, 30000);  // Auto-sleep after 30s from any state
+fsm.addGlobalTimedTransition(&idle_state, 60000, onTimeout);  // With callback
+```
+
+**Advantages of Helper Functions:**
+
+- ✅ Self-documenting code - function name explains behavior
+- ✅ Better type safety - prevents accidental `NULL` usage
+- ✅ Consistent with existing API pattern
+- ✅ IntelliSense/autocomplete friendly
+- ✅ Easier to understand and maintain
+
+**Common Global Transition Use Cases:**
+
+- Emergency stops and safety shutdowns
+- Error handling and fault recovery
+- System reset and restart functionality
+- Power management (sleep mode entry)
+- Timeout handling across all states
+
 #### Timed Transitions
 
 ```cpp
