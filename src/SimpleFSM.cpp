@@ -131,7 +131,10 @@ bool SimpleFSM::trigger(int event_id) {
   if (!is_initialized) initFSM();
   // Find the transition with the current state and given event
   for (int i = 0; i < num_standard; i++) {
-    if (transitions[i].from == current_state && transitions[i].event_id == event_id) {
+    // Check for global transition (from == NULL) OR specific state transition
+    if ((transitions[i].from == NULL || 
+        transitions[i].from == current_state) && 
+        transitions[i].event_id == event_id) {
       return transitionTo(&(transitions[i]));
     }
   }
@@ -334,6 +337,102 @@ FSMError SimpleFSM::add(TimedTransition newTransitions[], int size) {
 
 /////////////////////////////////////////////////////////////////
 
+FSMError SimpleFSM::addGlobalTransition(State* to, int event_id) {
+  return addGlobalTransition(to, event_id, NULL);
+}
+
+/////////////////////////////////////////////////////////////////
+
+FSMError SimpleFSM::addGlobalTransition(State* to, int event_id, CallbackFunction callback) {
+  // Validate input parameters
+  if (to == nullptr) {
+    last_error = FSMError::INVALID_PARAMETER;
+    return last_error;
+  }
+  
+  // Check bounds
+  if (num_standard >= MAX_TRANSITIONS) {
+    last_error = FSMError::ARRAY_TOO_LARGE;
+    return last_error;
+  }
+  
+  // Create a global transition using NULL as source state
+  Transition globalTransition(NULL, to, event_id, callback);
+  
+  // Check for existing global transitions with the same event ID (potential conflict)
+  for (int i = 0; i < num_standard; i++) {
+    if (transitions[i].from == NULL && transitions[i].event_id == event_id) {
+      // Found another global transition with same event ID - this could cause confusion
+      // Note: We continue anyway for backward compatibility, but only first one will trigger
+      break;
+    }
+  }
+  
+  // Add the destination state if not already present
+  FSMError stateError = addUniqueState(to);
+  if (stateError != FSMError::OK) {
+    return stateError;
+  }
+  
+  // Add the global transition
+  transitions[num_standard] = globalTransition;
+  addDOTTransition(transitions[num_standard]);
+  num_standard++;
+  
+  last_error = FSMError::OK;
+  return last_error;
+}
+
+/////////////////////////////////////////////////////////////////
+
+FSMError SimpleFSM::addGlobalTimedTransition(State* to, unsigned long interval) {
+  return addGlobalTimedTransition(to, interval, NULL);
+}
+
+/////////////////////////////////////////////////////////////////
+
+FSMError SimpleFSM::addGlobalTimedTransition(State* to, unsigned long interval, CallbackFunction callback) {
+  // Validate input parameters
+  if (to == nullptr || interval == INITIAL_ID_VALUE) {
+    last_error = FSMError::INVALID_PARAMETER;
+    return last_error;
+  }
+  
+  // Check bounds
+  if (num_timed >= MAX_TIMED_TRANSITIONS) {
+    last_error = FSMError::ARRAY_TOO_LARGE;
+    return last_error;
+  }
+  
+  // Create a global timed transition using NULL as source state
+  TimedTransition globalTimedTransition(NULL, to, interval, callback);
+  
+  // Check for existing global timed transitions with the same interval and destination
+  for (int i = 0; i < num_timed; i++) {
+    if (timed[i].from == NULL && timed[i].to == to && timed[i].interval == interval) {
+      // Found another global timed transition with same destination and interval
+      // Note: We continue anyway for backward compatibility, but behavior may be unpredictable
+      break;
+    }
+  }
+  
+  // Add the destination state if not already present
+  FSMError stateError = addUniqueState(to);
+  if (stateError != FSMError::OK) {
+    return stateError;
+  }
+  
+  // Add the global timed transition
+  timed[num_timed] = globalTimedTransition;
+  addDOTTransition(timed[num_timed]);
+  num_timed++;
+  
+  last_error = FSMError::OK;
+  return last_error;
+}
+
+/////////////////////////////////////////////////////////////////
+
 bool SimpleFSM::isStateInArray(State* state, State* stateArray[], int arraySize) {
   for (int i = 0; i < arraySize; i++) {
     if (stateArray[i] == state) {
@@ -426,7 +525,12 @@ bool SimpleFSM::isTimeForRun(unsigned long now, int interval) {
 
 void SimpleFSM::handleTimedEvents(unsigned long now) {
   for (int i = 0; i < num_timed; i++) {
-    if (timed[i].from != current_state) continue;
+    // Check for global timed transition (from == NULL) OR specific state transition
+    if (timed[i].from != NULL && timed[i].from != current_state) continue;
+    
+    // For global timed transitions (from == NULL), they apply to all states
+    // For specific transitions, they only apply when from == current_state
+    
     // start the transition timer 
     if (timed[i].start == 0) {
       timed[i].start = now;
@@ -478,7 +582,8 @@ bool SimpleFSM::changeToState(State* s, unsigned long now) {
   last_transition = now;
   // Reset timers for timed transitions from the new state
   for (int i = 0; i < num_timed; i++) {
-    if (timed[i].from == current_state) {
+    // Reset timers for transitions FROM this state or global transitions (from == NULL)
+    if (timed[i].from == current_state || timed[i].from == NULL) {
       timed[i].start = 0;
     }
   }

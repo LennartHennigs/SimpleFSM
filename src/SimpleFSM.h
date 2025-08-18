@@ -47,6 +47,12 @@ class SimpleFSM {
     FSMError add(TimedTransition t[], int size);
     FSMError add(State* states[], int size);
     FSMError addUniqueState(State* state);
+    
+    // Global transition helpers - transitions that work from any state
+    FSMError addGlobalTransition(State* to, int event_id);
+    FSMError addGlobalTransition(State* to, int event_id, CallbackFunction callback);
+    FSMError addGlobalTimedTransition(State* to, unsigned long interval);
+    FSMError addGlobalTimedTransition(State* to, unsigned long interval, CallbackFunction callback);
 
     void setInitialState(State* state);
     void setFinishedHandler(CallbackFunction f);
