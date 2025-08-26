@@ -13,5 +13,13 @@
 		"url": "https://lennarthennigs.de"
 	},
 	"frameworks": "arduino",
-	"platforms": "*"
+	"platforms": "*",
+	"dependencies": [
+		{
+			"name": "AUnit",
+			"authors": "Brian T. Park",
+			"version": "^1.7.1",
+			"frameworks": "arduino"
+		}
+	]
 }
