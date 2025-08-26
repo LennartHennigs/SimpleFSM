@@ -42,9 +42,18 @@ const char* SimpleFSM::getErrorString(FSMError error) const {
 /////////////////////////////////////////////////////////////////
 
 SimpleFSM::~SimpleFSM() {
-  if (states) delete[] states;
-  if (transitions) delete[] transitions;
-  if (timed) delete[] timed;
+  if (states) {
+    delete[] states;
+    states = nullptr;
+  }
+  if (transitions) {
+    delete[] transitions;
+    transitions = nullptr;
+  }
+  if (timed) {
+    delete[] timed;
+    timed = nullptr;
+  }
 }
 
 /////////////////////////////////////////////////////////////////
@@ -150,6 +159,10 @@ State* SimpleFSM::getPreviousState() const {
 /////////////////////////////////////////////////////////////////
 
 State* SimpleFSM::getState() const {
+  // Initialize FSM if needed to ensure current_state is set
+  if (!is_initialized && initial_state != nullptr) {
+    const_cast<SimpleFSM*>(this)->initFSM();
+  }
   return current_state;
 }
 
@@ -252,7 +265,10 @@ FSMError SimpleFSM::add(Transition newTransitions[], int size) {
   }
   
   if (transitions != NULL) {
-    memcpy((void*)temp, transitions, num_standard * sizeof(Transition));
+    // Use proper copy construction instead of memcpy to avoid vtable corruption
+    for (int i = 0; i < num_standard; i++) {
+      temp[i] = transitions[i];
+    }
     delete[] transitions;
   }
   transitions = temp;
@@ -316,7 +332,10 @@ FSMError SimpleFSM::add(TimedTransition newTransitions[], int size) {
   }
   
   if (timed != NULL) {
-    memcpy((void*)temp, timed, num_timed * sizeof(TimedTransition));
+    // Use proper copy construction instead of memcpy to avoid vtable corruption
+    for (int i = 0; i < num_timed; i++) {
+      temp[i] = timed[i];
+    }
     delete[] timed;
   }
   timed = temp;
@@ -609,8 +628,13 @@ bool SimpleFSM::transitionTo(AbstractTransition* transition) {
   if (transition->to == NULL) return false;
   // can I pass the guard
   if (transition->guard_cb != NULL && !transition->guard_cb()) return false;
-  // trigger events
-  if (transition->from->on_exit != NULL) transition->from->on_exit();
+  // trigger events - handle global transitions (from == NULL)
+  if (transition->from != NULL && transition->from->on_exit != NULL) {
+    transition->from->on_exit();
+  } else if (transition->from == NULL && current_state != NULL && current_state->on_exit != NULL) {
+    // For global transitions, trigger current state's on_exit
+    current_state->on_exit();
+  }
   if (transition->on_run_cb != NULL) transition->on_run_cb();
   if (on_transition_cb != NULL) on_transition_cb();
   // store the transition
