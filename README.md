@@ -327,7 +327,7 @@ The library includes comprehensive testing infrastructure to ensure compatibilit
 
 ### Compilation Testing
 
-A bash script (`test/test_compilation.sh`) automatically tests compilation of all examples across multiple platforms:
+A bash script (`test/compile_examples.sh`) automatically tests compilation of all examples across multiple platforms:
 
 * **Wemos D1 Mini** (ESP8266)
 * **M5Stack Core2** (ESP32)
@@ -337,8 +337,8 @@ A bash script (`test/test_compilation.sh`) automatically tests compilation of al
 
 ```bash
 cd test
-./test_compilation.sh          # Run all tests
-./test_compilation.sh --help   # Show help and options
+./compile_examples.sh          # Run all tests
+./compile_examples.sh --help   # Show help and options
 ```
 
 **Features:**

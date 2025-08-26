@@ -1,10 +1,55 @@
-# SimpleFSM Library - AI Assistant Reference Guide
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## SimpleFSM Library - AI Assistant Reference Guide
 
 ## Overview
 
 SimpleFSM is an Arduino/ESP library for creating finite state machines. It's designed for embedded systems and IoT devices, providing a clean API for state management with callbacks, transitions, and timing.
 
 **Compatibility**: This library is designed to work with both **Arduino IDE** and **PlatformIO**, maintaining compatibility with standard Arduino C++ (based on C++11/C++14) without advanced STL features or modern C++ constructs that might not be available in embedded environments.
+
+## Development Commands
+
+### Testing & Compilation
+
+```bash
+# Test compilation across all supported platforms
+./compile_examples.sh                    # Run from repository root
+cd test && ./compile_examples.sh         # Run from test directory
+
+# Test specific configurations
+./compile_examples.sh --verbose          # Verbose output
+./compile_examples.sh --help             # Show available options
+```
+
+### PlatformIO Commands
+
+```bash
+# Build for default environment (Wemos D1 Mini)
+pio run
+
+# Build for specific platforms
+pio run -e Wemos                         # ESP8266 Wemos D1 Mini
+pio run -e M5Stack_ESP32                 # ESP32 M5Stack Core2
+pio run -e Nano                          # Arduino Nano
+
+# Upload to device
+pio run -t upload -e Wemos
+
+# Monitor serial output
+pio device monitor -p /dev/ttyUSB0 -b 9600
+```
+
+### Prerequisites for Testing
+
+- **arduino-cli** must be installed and in PATH
+- Required Arduino cores:
+  - `esp8266:esp8266` (for ESP8266 platforms)
+  - `esp32:esp32` (for ESP32 platforms)  
+  - `arduino:avr` (for Arduino Nano/Uno)
+- Install cores: `arduino-cli core install esp8266:esp8266 esp32:esp32 arduino:avr`
 
 ## Target Platforms
 
@@ -44,6 +89,45 @@ When generating code for this library:
 - ✅ Use traditional C-style arrays or simple classes
 - ✅ Use function pointers: `void (*callback)()`
 - ✅ Use Arduino timing functions: `millis()`, `delay()`
+
+## Architecture Overview
+
+### Core Class Structure
+
+- **SimpleFSM**: Main state machine controller
+  - Manages states, transitions, and execution
+  - Provides error handling with `FSMError` enum
+  - Thread-safe for single-threaded Arduino environment
+
+- **State**: Represents individual states
+  - Contains callbacks: `on_enter`, `on_state`, `on_exit`
+  - Can be marked as `final` to terminate FSM
+  - Must be passed to FSM as pointer arrays (`State*[]`)
+
+- **Transitions**: Two main types
+  - **Transition**: Event-driven state changes
+  - **TimedTransition**: Time-based automatic transitions
+  - Both inherit from abstract `BaseTransition` class
+
+- **FSMUtils**: Helper utilities (v2.0+)
+  - `createManyToOneTransitions()`: Generate multiple source → single target transitions
+  - Reduces boilerplate for complex state machines
+
+- **FSMTestHelper**: Testing utilities
+  - Direct state manipulation for unit tests
+  - Should only be used in test code, not production
+
+### Memory Management Architecture
+
+The library uses dynamic allocation internally but provides safety mechanisms:
+
+- **Bounds checking**: Maximum limits prevent memory overflows
+  - `MAX_STATES`: 50 states maximum
+  - `MAX_TRANSITIONS`: 100 regular transitions
+  - `MAX_TIMED_TRANSITIONS`: 50 timed transitions
+- **Error codes**: All operations return `FSMError` instead of crashing
+- **Input validation**: Null pointer checks and parameter validation
+- **Graceful degradation**: Memory allocation failures are handled cleanly
 
 ## Core Concepts
 
@@ -227,6 +311,14 @@ if (result != FSMError::OK) {
 - Debouncing considerations
 - Real-world input processing
 
+### 7. Global Transitions
+
+**See**: `examples/GlobalTransitions/` and `examples/GlobalTransitionHelpers/`
+
+- Emergency stops from any state
+- System-wide event handling
+- Helper function usage patterns
+
 ## API Reference
 
 ### Core Methods
@@ -240,6 +332,12 @@ SimpleFSM fsm(&initial_state);
 FSMError add(Transition t[], int size);
 FSMError add(TimedTransition t[], int size);
 FSMError add(State* states[], int size);
+
+// Global transitions (v2.0+)
+FSMError addGlobalTransition(State* to, int event_id);
+FSMError addGlobalTransition(State* to, int event_id, CallbackFunction callback);
+FSMError addGlobalTimedTransition(State* to, int interval);
+FSMError addGlobalTimedTransition(State* to, int interval, CallbackFunction callback);
 
 // Control
 bool trigger(int event_id);
@@ -369,6 +467,14 @@ FSMTestHelper::changeToState(fsm, &test_state);
 - Check error conditions
 - Test memory limits
 
+### Compilation Testing
+
+Use the provided test script to verify compatibility:
+
+```bash
+./compile_examples.sh  # Tests all examples on all platforms
+```
+
 ## Performance Notes
 
 ### Timing Characteristics
@@ -425,6 +531,7 @@ FSMError result = fsm.add(state_ptrs, 1);
 6. **Implement proper error handling** for production code
 7. **Consider memory limits** when designing large FSMs
 8. **Test state machines thoroughly** with all edge cases
+9. **Prefer global transition helpers** over NULL-based constructors (v2.0+)
 
 ## Debugging Tips
 

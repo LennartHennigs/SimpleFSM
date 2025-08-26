@@ -46,7 +46,7 @@
   - Added comprehensive memory safety and error handling tests.
   - Exposed protected FSM internals for testing via friend class (`FSMTestHelper`).
 - Added comprehensive testing infrastructure
-  - New compilation test script (`test/test_compilation.sh`) for automated platform testing.
+  - New compilation test script (`test/compile_examples.sh`) for automated platform testing.
   - Tests compilation across ESP8266 (Wemos D1 Mini), ESP32 (M5Stack Core2), and Arduino Nano.
   - Automatic platform-specific example exclusion handling.
   - Colored output with detailed error reporting for failed compilations.
