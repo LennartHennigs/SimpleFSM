@@ -44,15 +44,15 @@ const char* SimpleFSM::getErrorString(FSMError error) const {
 SimpleFSM::~SimpleFSM() {
   if (states) {
     delete[] states;
-    states = nullptr;
+    states = NULL;
   }
   if (transitions) {
     delete[] transitions;
-    transitions = nullptr;
+    transitions = NULL;
   }
   if (timed) {
     delete[] timed;
-    timed = nullptr;
+    timed = NULL;
   }
 }
 
@@ -89,7 +89,7 @@ State* SimpleFSM::getStateByName(String name) {
 
 FSMError SimpleFSM::add(State* newStates[], int size) {
   // Validate input parameters
-  if (newStates == nullptr || size <= INITIAL_ID_VALUE) {
+  if (newStates == NULL || size <= INITIAL_ID_VALUE) {
     last_error = FSMError::INVALID_PARAMETER;
     return last_error;
   }
@@ -160,7 +160,7 @@ State* SimpleFSM::getPreviousState() const {
 
 State* SimpleFSM::getState() const {
   // Initialize FSM if needed to ensure current_state is set
-  if (!is_initialized && initial_state != nullptr) {
+  if (!is_initialized && initial_state != NULL) {
     const_cast<SimpleFSM*>(this)->initFSM();
   }
   return current_state;
@@ -183,9 +183,9 @@ void SimpleFSM::setTransitionHandler(CallbackFunction f) {
 // Change: states is now an array of State* (pointers), not State objects
 // Add a state to the global states array if not already present
 FSMError SimpleFSM::addUniqueState(State* state) {
-  if (state == nullptr) {
-    last_error = FSMError::NULL_POINTER;
-    return last_error;
+  if (state == NULL) {
+    // NULL state is valid for global transitions - just skip adding it
+    return FSMError::OK;
   }
   
   // Check if already present
@@ -203,7 +203,7 @@ FSMError SimpleFSM::addUniqueState(State* state) {
   
   // Expand the states array
   State** temp = new State*[num_states + ARRAY_INCREMENT];
-  if (temp == nullptr) {
+  if (temp == NULL) {
     last_error = FSMError::OUT_OF_MEMORY;
     return last_error;
   }
@@ -222,7 +222,7 @@ FSMError SimpleFSM::addUniqueState(State* state) {
 
 FSMError SimpleFSM::add(Transition newTransitions[], int size) {
   // Validate input parameters
-  if (newTransitions == nullptr || size <= INITIAL_ID_VALUE) {
+  if (newTransitions == NULL || size <= INITIAL_ID_VALUE) {
     last_error = FSMError::INVALID_PARAMETER;
     return last_error;
   }
@@ -259,7 +259,7 @@ FSMError SimpleFSM::add(Transition newTransitions[], int size) {
   
   // Allocate or expand storage for transitions with exact size
   Transition* temp = new Transition[num_standard + uniqueCount];
-  if (temp == nullptr) {
+  if (temp == NULL) {
     last_error = FSMError::OUT_OF_MEMORY;
     return last_error;
   }
@@ -289,7 +289,7 @@ FSMError SimpleFSM::add(Transition newTransitions[], int size) {
 
 FSMError SimpleFSM::add(TimedTransition newTransitions[], int size) {
   // Validate input parameters
-  if (newTransitions == nullptr || size <= INITIAL_ID_VALUE) {
+  if (newTransitions == NULL || size <= INITIAL_ID_VALUE) {
     last_error = FSMError::INVALID_PARAMETER;
     return last_error;
   }
@@ -326,7 +326,7 @@ FSMError SimpleFSM::add(TimedTransition newTransitions[], int size) {
   
   // Allocate memory or expand existing storage with exact size
   TimedTransition* temp = new TimedTransition[num_timed + uniqueCount];
-  if (temp == nullptr) {
+  if (temp == NULL) {
     last_error = FSMError::OUT_OF_MEMORY;
     return last_error;
   }
@@ -364,7 +364,7 @@ FSMError SimpleFSM::addGlobalTransition(State* to, int event_id) {
 
 FSMError SimpleFSM::addGlobalTransition(State* to, int event_id, CallbackFunction callback) {
   // Validate input parameters
-  if (to == nullptr) {
+  if (to == NULL) {
     last_error = FSMError::INVALID_PARAMETER;
     return last_error;
   }
@@ -379,11 +379,13 @@ FSMError SimpleFSM::addGlobalTransition(State* to, int event_id, CallbackFunctio
   Transition globalTransition(NULL, to, event_id, callback);
   
   // Check for existing global transitions with the same event ID (potential conflict)
-  for (int i = 0; i < num_standard; i++) {
-    if (transitions[i].from == NULL && transitions[i].event_id == event_id) {
-      // Found another global transition with same event ID - this could cause confusion
-      // Note: We continue anyway for backward compatibility, but only first one will trigger
-      break;
+  if (transitions != NULL) {
+    for (int i = 0; i < num_standard; i++) {
+      if (transitions[i].from == NULL && transitions[i].event_id == event_id) {
+        // Found another global transition with same event ID - this could cause confusion
+        // Note: We continue anyway for backward compatibility, but only first one will trigger
+        break;
+      }
     }
   }
   
@@ -393,8 +395,24 @@ FSMError SimpleFSM::addGlobalTransition(State* to, int event_id, CallbackFunctio
     return stateError;
   }
   
-  // Add the global transition
-  transitions[num_standard] = globalTransition;
+  // Allocate memory for the new transition
+  Transition* temp = new Transition[num_standard + ARRAY_INCREMENT];
+  if (temp == NULL) {
+    last_error = FSMError::OUT_OF_MEMORY;
+    return last_error;
+  }
+  
+  // Copy existing transitions if any
+  if (transitions != NULL) {
+    for (int i = 0; i < num_standard; i++) {
+      temp[i] = transitions[i];
+    }
+    delete[] transitions;
+  }
+  
+  // Add the new global transition
+  temp[num_standard] = globalTransition;
+  transitions = temp;
   addDOTTransition(transitions[num_standard]);
   num_standard++;
   
@@ -412,7 +430,7 @@ FSMError SimpleFSM::addGlobalTimedTransition(State* to, unsigned long interval) 
 
 FSMError SimpleFSM::addGlobalTimedTransition(State* to, unsigned long interval, CallbackFunction callback) {
   // Validate input parameters
-  if (to == nullptr || interval == INITIAL_ID_VALUE) {
+  if (to == NULL || interval == INITIAL_ID_VALUE) {
     last_error = FSMError::INVALID_PARAMETER;
     return last_error;
   }
@@ -427,11 +445,13 @@ FSMError SimpleFSM::addGlobalTimedTransition(State* to, unsigned long interval, 
   TimedTransition globalTimedTransition(NULL, to, interval, callback);
   
   // Check for existing global timed transitions with the same interval and destination
-  for (int i = 0; i < num_timed; i++) {
-    if (timed[i].from == NULL && timed[i].to == to && timed[i].interval == interval) {
-      // Found another global timed transition with same destination and interval
-      // Note: We continue anyway for backward compatibility, but behavior may be unpredictable
-      break;
+  if (timed != NULL) {
+    for (int i = 0; i < num_timed; i++) {
+      if (timed[i].from == NULL && timed[i].to == to && timed[i].interval == interval) {
+        // Found another global timed transition with same destination and interval
+        // Note: We continue anyway for backward compatibility, but behavior may be unpredictable
+        break;
+      }
     }
   }
   
@@ -441,8 +461,24 @@ FSMError SimpleFSM::addGlobalTimedTransition(State* to, unsigned long interval, 
     return stateError;
   }
   
-  // Add the global timed transition
-  timed[num_timed] = globalTimedTransition;
+  // Allocate memory for the new timed transition
+  TimedTransition* temp = new TimedTransition[num_timed + ARRAY_INCREMENT];
+  if (temp == NULL) {
+    last_error = FSMError::OUT_OF_MEMORY;
+    return last_error;
+  }
+  
+  // Copy existing timed transitions if any
+  if (timed != NULL) {
+    for (int i = 0; i < num_timed; i++) {
+      temp[i] = timed[i];
+    }
+    delete[] timed;
+  }
+  
+  // Add the new global timed transition
+  temp[num_timed] = globalTimedTransition;
+  timed = temp;
   addDOTTransition(timed[num_timed]);
   num_timed++;
   
@@ -670,13 +706,15 @@ String SimpleFSM::getDOTHeader() {
 /////////////////////////////////////////////////////////////////
 
 void SimpleFSM::addDOTTransition(Transition& t) {
-  dot_definition = dot_definition + getDOTTransition(t.from->getName(), t.to->getName(), t.getName(), "ID=" + String(t.event_id));
+  String fromName = (t.from != NULL) ? t.from->getName() : "GLOBAL";
+  dot_definition = dot_definition + getDOTTransition(fromName, t.to->getName(), t.getName(), "ID=" + String(t.event_id));
 }
 
 /////////////////////////////////////////////////////////////////
 
 void SimpleFSM::addDOTTransition(TimedTransition& t) {
-  dot_definition = dot_definition + getDOTTransition(t.from->getName(), t.to->getName(), t.getName(), String(t.getInterval()) + "ms");
+  String fromName = (t.from != NULL) ? t.from->getName() : "GLOBAL";
+  dot_definition = dot_definition + getDOTTransition(fromName, t.to->getName(), t.getName(), String(t.getInterval()) + "ms");
 }
 
 /////////////////////////////////////////////////////////////////
