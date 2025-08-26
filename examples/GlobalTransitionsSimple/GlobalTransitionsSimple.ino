@@ -2,17 +2,10 @@
 /*
   GlobalTransitionsSimple.ino
   
-  This simplified example demonstrates the NEW addGlobalTransition() helper 
+  This simplified example demonstrates the addGlobalTransition() helper 
   functions in SimpleFSM. Global transitions work from ANY state and are 
   perfect for emergency stops and system-wide events.
   
-  This example shows:
-  - NEW: fsm.addGlobalTransition() helper function (recommended)
-  - OLD: Transition(NULL, state, event) approach (commented out)
-  
-  The NEW approach is cleaner, more explicit, and easier to understand.
-  
-  This example works on all Arduino platforms without external dependencies.
 */
 /////////////////////////////////////////////////////////////////
 
@@ -23,14 +16,12 @@
 enum Events {
   START_EVENT = 1,
   PROCESS_EVENT = 2,
-  EMERGENCY_EVENT = 3,
-  RESET_EVENT = 4
+  EMERGENCY_EVENT = 3
 };
 
 /////////////////////////////////////////////////////////////////
 // Constants
 const unsigned long DEMO_INTERVAL_MS = 3000;
-const unsigned long AUTO_TIMEOUT_MS = 8000;
 
 /////////////////////////////////////////////////////////////////
 SimpleFSM fsm;
@@ -61,14 +52,6 @@ void onEmergencyStop() {
   Serial.println(">>> EMERGENCY STOP: Global transition from any state!");
 }
 
-void onSystemReset() {
-  Serial.println(">>> SYSTEM RESET: Global transition back to idle");
-}
-
-void onAutoShutdown() {
-  Serial.println(">>> AUTO SHUTDOWN: Global timeout triggered");
-}
-
 /////////////////////////////////////////////////////////////////
 // Define states
 State idleState("Idle", onIdleEnter);
@@ -86,23 +69,8 @@ Transition regularTransitions[] = {
 };
 
 /////////////////////////////////////////////////////////////////
-// Define GLOBAL transitions - OLD WAY (commented out for comparison)
-// This shows the traditional approach using NULL as source state:
-/*
-Transition globalTransitions[] = {
-  // Emergency stop - can be triggered from ANY state
-  Transition(NULL, &emergencyState, EMERGENCY_EVENT, onEmergencyStop)
-};
-*/
-
-// Compare:
-//   OLD: Transition(NULL, &emergencyState, EMERGENCY_EVENT, callback)
-//   NEW: fsm.addGlobalTransition(&emergencyState, EMERGENCY_EVENT, callback)
-
-/////////////////////////////////////////////////////////////////
 // Define timed transitions
 TimedTransition timedTransitions[] = {
-  // Regular timed transition: Processing -> Idle after 2 seconds
   TimedTransition(&processingState, &idleState, 2000)
 };
 
@@ -135,15 +103,9 @@ void runDemo() {
       fsm.trigger(START_EVENT);
       break;
       
-    case 4:
-      Serial.println("Triggering PROCESS_EVENT to go to processing state");
-      fsm.trigger(PROCESS_EVENT);
-      Serial.println("Processing will auto-return to idle after 2 seconds (timed transition)");
-      break;
-      
     default:
       Serial.println("Demo cycle complete - restarting demo sequence");
-      demoStep = 0;  // Reset demo to start over
+      demoStep = 0;
       break;
   }
   
@@ -169,12 +131,8 @@ void setup() {
   }
   
   // Add regular transitions
-  fsm.add(regularTransitions, 2);
-  
-  // Add global transitions using NEW helper functions (recommended approach)
-  // This replaces the old way: 
-  // Transition(NULL, &emergencyState, EMERGENCY_EVENT, onEmergencyStop)
-  
+  fsm.add(regularTransitions, 2);  
+  // Global transition using helper function (works from ANY state)
   fsm.addGlobalTransition(&emergencyState, EMERGENCY_EVENT, onEmergencyStop);
   
   // Add timed transitions
@@ -184,9 +142,6 @@ void setup() {
   Serial.println("- 2 regular transitions");
   Serial.println("- 1 global transition (NEW helper function)");
   Serial.println("- 1 timed transition");
-  Serial.println("\nComparison:");
-//   Serial.println("OLD: Transition(NULL, &emergencyState, EMERGENCY_EVENT, callback)");
-  Serial.println("NEW: fsm.addGlobalTransition(&emergencyState, EMERGENCY_EVENT, callback)");
   Serial.println("\nStarting automated demo...\n");
 }
 
