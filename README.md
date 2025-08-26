@@ -353,6 +353,37 @@ cd test
 * [arduino-cli](https://arduino.github.io/arduino-cli/) installed and in PATH
 * Required Arduino cores: `esp8266:esp8266`, `esp32:esp32`, `arduino:avr`
 
+### Unit Testing
+
+The library includes comprehensive unit tests using the [AUnit](https://github.com/bxparks/AUnit) testing framework:
+
+**Test Coverage:**
+* FSM state transitions and callbacks
+* Timed transitions and timeout handling
+* Guard conditions and validation
+* Error handling and memory safety
+* Global transition functionality
+
+**Dependencies:**
+* **AUnit** (v1.7.1+) - Arduino unit testing framework by Brian T. Park
+* Automatically installed via PlatformIO `test_deps`
+* For Arduino IDE: Install manually via Library Manager
+
+**Running Tests:**
+
+```bash
+# PlatformIO - Native tests using EpoxyDuino (no hardware required)
+pio test -e epoxy-esp8266        # Emulates ESP8266
+pio test -e epoxy-esp32          # Emulates ESP32
+
+# PlatformIO - Hardware tests on specific platform
+pio test -e Wemos_test           # Real ESP8266 hardware
+pio test -e M5Stack_ESP32_test   # Real ESP32 hardware  
+pio test -e Nano_test            # Real Arduino Nano hardware
+
+# Arduino IDE - open test/SimpleFSMTest/SimpleFSMTest.ino
+```
+
 ## Notes
 
 * This library is heavily inspired by the [Arduino-fsm](https://github.com/jonblack/arduino-fsm) library created by [Jon Black](https://github.com/jonblack). I initially used some of his as a base. Without Jon's work this library would not exist.

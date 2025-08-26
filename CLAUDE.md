@@ -453,12 +453,41 @@ void loop() {
 
 ### Unit Testing
 
+The library includes comprehensive unit tests using the AUnit framework:
+
+**Dependencies:**
+- **AUnit** (v1.7.1+) - Arduino unit testing framework by Brian T. Park
+- Automatically installed via PlatformIO `test_deps`
+- For Arduino IDE: Install manually via Library Manager
+
+**Running Tests:**
+
+```bash
+# PlatformIO - Native tests using EpoxyDuino (no hardware required, fastest)
+pio test -e epoxy-esp8266        # Emulates ESP8266 (~3.5s)
+pio test -e epoxy-esp32          # Emulates ESP32 (~3.5s)
+
+# PlatformIO - Hardware tests on specific platform
+pio test -e Wemos_test           # Real ESP8266 hardware
+pio test -e M5Stack_ESP32_test   # Real ESP32 hardware  
+pio test -e Nano_test            # Real Arduino Nano hardware
+```
+
+**Test Helper Usage:**
+
 ```cpp
 #include "FSMTestHelper.h"  // For testing only
 
 // Direct state change for testing
 FSMTestHelper::changeToState(fsm, &test_state);
 ```
+
+**Test Coverage:**
+- FSM state transitions and callbacks
+- Timed transitions and timeout handling
+- Guard conditions and validation
+- Error handling and memory safety
+- Global transition functionality
 
 ### Integration Testing
 
