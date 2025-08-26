@@ -319,7 +319,8 @@ See `ManyToOneTransitionExample.ino` for a complete usage example.
 * [MixedTransitionsBrowser.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitionsBrowser/MixedTransitionsBrowser.ino) - creates a webserver to show the Graphviz diagram of the state machine
 * [Guards.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/Guards/Guards.ino) - showing how to define guard functions
 * [ManyToOneTransitionExample.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/ManyToOneTransitionExample/ManyToOneTransitionExample.ino) - demonstrates utility helpers for creating many-to-one transitions
-* [GlobalTransitionsSimple.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/GlobalTransitionsSimple/GlobalTransitionsSimple.ino) - demonstrates global transitions using NULL as source state for emergency stops and system-wide events
+* [GlobalTransitionsSimple.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/GlobalTransitionsSimple/GlobalTransitionsSimple.ino) - demonstrates global transitions using the addGlobalTransition() helper functions
+* [GlobalTransitionHelpers.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/GlobalTransitionHelpers/GlobalTransitionHelpers.ino) - complete demonstration of global transition helper functions including timed global transitions
 
 ## Testing
 

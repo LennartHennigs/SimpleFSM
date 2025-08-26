@@ -313,7 +313,7 @@ if (result != FSMError::OK) {
 
 ### 7. Global Transitions
 
-**See**: `examples/GlobalTransitions/` and `examples/GlobalTransitionHelpers/`
+**See**: `examples/GlobalTransitionsSimple/` and `examples/GlobalTransitionHelpers/`
 
 - Emergency stops from any state
 - System-wide event handling
