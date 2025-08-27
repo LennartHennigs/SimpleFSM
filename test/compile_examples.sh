@@ -12,11 +12,11 @@ set -e  # Exit on any error
 #######################################################################
 
 # Test platforms configuration
-# Format: "FQBN|Display Name"
+# Format: "FQBN|Display Name|PIO Board ID"
 declare -a PLATFORMS=(
-    "esp8266:esp8266:d1_mini|Wemos D1 Mini (ESP8266)"
-    "esp32:esp32:m5stack_core2|M5Stack Core2 (ESP32)"
-    "arduino:avr:nano|Arduino Nano"
+    "esp8266:esp8266:d1_mini|Wemos D1 Mini (ESP8266)|d1_mini"
+    "esp32:esp32:m5stack_core2|M5Stack Core2 (ESP32)|m5stack-core2"
+    "arduino:avr:nano|Arduino Nano|nanoatmega328"
 )
 
 # Platform-specific example exclusions
@@ -71,7 +71,9 @@ print_status() {
 test_compilation() {
     local platform_fqbn=$1
     local platform_name=$2
-    local example_path=$3
+    local pio_env=$3
+    local example_path=$4
+    local use_tool=$5
     local example_name=$(basename "$example_path")
     local ino_file="$example_path/$example_name.ino"
     
@@ -96,84 +98,165 @@ test_compilation() {
     
     # Compile with minimal output
     echo -n "  Testing $example_name ... "
-    if arduino-cli compile --fqbn "$platform_fqbn" "$ino_file" --output-dir "/tmp/arduino-build-$example_name-$(date +%s)" > /dev/null 2>&1; then
-        echo -e "${GREEN}[PASS]${NC}"
-        PASSED_TESTS=$((PASSED_TESTS + 1))
-        return 0
-    else
-        echo -e "${RED}[FAIL]${NC}"
-        FAILED_TESTS=$((FAILED_TESTS + 1))
+    
+    if [[ "$use_tool" == "pio" ]]; then
+        # Use PlatformIO CI - much simpler now that main.cpp is removed
+        local lib_path=""
+        if [[ "$example_path" == *"examples/"* ]]; then
+            lib_path="../../"  # From examples/ExampleName/ to library root
+        else
+            lib_path="../../../"  # Fallback path
+        fi
         
-        # Show compilation error for debugging
-        echo -e "    ${RED}Error details:${NC}"
-        arduino-cli compile --fqbn "$platform_fqbn" "$ino_file" 2>&1 | tail -5 | sed 's/^/     /'
-        echo ""
-        return 1
+        # Create minimal platformio.ini for dependencies
+        local temp_ini="$example_path/platformio_temp.ini"
+        local platform_name=""
+        case "$pio_env" in
+            d1_mini) platform_name="espressif8266" ;;
+            m5stack-core2) platform_name="espressif32" ;;
+            nanoatmega328) platform_name="atmelavr" ;;
+        esac
+        
+        cat > "$temp_ini" << EOF
+[env:test]
+platform = $platform_name
+board = $pio_env
+framework = arduino
+lib_deps = lennarthennigs/Button2@^2.3.4
+EOF
+        
+        if (cd "$example_path" && pio ci --project-conf="platformio_temp.ini" --lib="$lib_path" "$example_name.ino" > /dev/null 2>&1); then
+            echo -e "${GREEN}[PASS]${NC}"
+            PASSED_TESTS=$((PASSED_TESTS + 1))
+            # Clean up temporary file
+            rm -f "$temp_ini"
+            return 0
+        else
+            echo -e "${RED}[FAIL]${NC}"
+            FAILED_TESTS=$((FAILED_TESTS + 1))
+            
+            # Show compilation error for debugging
+            echo -e "    ${RED}Error details:${NC}"
+            (cd "$example_path" && pio ci --project-conf="platformio_temp.ini" --lib="$lib_path" "$example_name.ino" 2>&1 | tail -5 | sed 's/^/     /')
+            echo ""
+            # Clean up temporary file
+            rm -f "$temp_ini"
+            return 1
+        fi
+    else
+        # Use Arduino CLI
+        if arduino-cli compile --fqbn "$platform_fqbn" "$ino_file" --output-dir "/tmp/arduino-build-$example_name-$(date +%s)" > /dev/null 2>&1; then
+            echo -e "${GREEN}[PASS]${NC}"
+            PASSED_TESTS=$((PASSED_TESTS + 1))
+            return 0
+        else
+            echo -e "${RED}[FAIL]${NC}"
+            FAILED_TESTS=$((FAILED_TESTS + 1))
+            
+            # Show compilation error for debugging
+            echo -e "    ${RED}Error details:${NC}"
+            arduino-cli compile --fqbn "$platform_fqbn" "$ino_file" 2>&1 | tail -5 | sed 's/^/     /'
+            echo ""
+            return 1
+        fi
     fi
 }
 
-# Function to check if arduino-cli is available
+# Function to check prerequisites
 check_prerequisites() {
+    local use_tool=$1
     print_status "INFO" "Checking prerequisites..."
     
-    if ! command -v arduino-cli &> /dev/null; then
-        print_status "ERROR" "arduino-cli is not installed or not in PATH"
-        echo "Please install arduino-cli: https://arduino.github.io/arduino-cli/"
-        exit 1
+    if [[ "$use_tool" == "pio" ]]; then
+        if ! command -v pio &> /dev/null; then
+            print_status "ERROR" "PlatformIO (pio) is not installed or not in PATH"
+            echo "Please install PlatformIO: https://platformio.org/install/cli"
+            exit 1
+        fi
+        
+        print_status "SUCCESS" "PlatformIO found: $(pio --version | head -1)"
+    else
+        if ! command -v arduino-cli &> /dev/null; then
+            print_status "ERROR" "arduino-cli is not installed or not in PATH"
+            echo "Please install arduino-cli: https://arduino.github.io/arduino-cli/"
+            exit 1
+        fi
+        
+        print_status "SUCCESS" "arduino-cli found: $(arduino-cli version | head -1)"
     fi
-    
-    print_status "SUCCESS" "arduino-cli found: $(arduino-cli version | head -1)"
     echo ""
 }
 
-# Function to check installed cores
+# Function to check installed cores (only for Arduino CLI)
 check_cores() {
-    print_status "INFO" "Checking installed Arduino cores..."
+    local use_tool=$1
     
-    local cores_output=$(arduino-cli core list)
-    echo "$cores_output"
-    echo ""
-    
-    # Check if required cores are installed
-    local missing_cores=()
-    
-    if ! echo "$cores_output" | grep -q "esp8266:esp8266"; then
-        missing_cores+=("esp8266:esp8266")
-    fi
-    
-    if ! echo "$cores_output" | grep -q "esp32:esp32"; then
-        missing_cores+=("esp32:esp32")
-    fi
-    
-    if ! echo "$cores_output" | grep -q "arduino:avr"; then
-        missing_cores+=("arduino:avr")
-    fi
-    
-    if [ ${#missing_cores[@]} -gt 0 ]; then
-        print_status "WARNING" "Missing cores detected: ${missing_cores[*]}"
-        print_status "INFO" "Install missing cores with:"
-        for core in "${missing_cores[@]}"; do
-            echo "  arduino-cli core install $core"
-        done
-        echo ""
+    if [[ "$use_tool" != "pio" ]]; then
+        print_status "INFO" "Checking required Arduino cores..."
+        
+        local cores_output=$(arduino-cli core list)
+        
+        # Check if required cores are installed
+        local missing_cores=()
+        
+        if ! echo "$cores_output" | grep -q "esp8266:esp8266"; then
+            missing_cores+=("esp8266:esp8266")
+        fi
+        
+        if ! echo "$cores_output" | grep -q "esp32:esp32"; then
+            missing_cores+=("esp32:esp32")
+        fi
+        
+        if ! echo "$cores_output" | grep -q "arduino:avr"; then
+            missing_cores+=("arduino:avr")
+        fi
+        
+        if [ ${#missing_cores[@]} -gt 0 ]; then
+            print_status "WARNING" "Missing cores detected: ${missing_cores[*]}"
+            print_status "INFO" "Install missing cores with:"
+            for core in "${missing_cores[@]}"; do
+                echo "  arduino-cli core install $core"
+            done
+            echo ""
+        else
+            print_status "SUCCESS" "All required cores are installed"
+            echo ""
+        fi
     fi
 }
 
 # Function to run all tests
 run_all_tests() {
+    local selected_platform="$1"
+    local use_tool="$2"
+    
     print_status "INFO" "Starting compilation tests for SimpleFSM library"
     echo "======================================================="
     echo ""
     
     # Test each platform with each example
     for platform_info in "${PLATFORMS[@]}"; do
-        IFS='|' read -r platform_fqbn platform_name <<< "$platform_info"
+        IFS='|' read -r platform_fqbn platform_name pio_env <<< "$platform_info"
         
-        print_status "INFO" "Testing platform: $platform_name"
+        # Skip if specific platform requested and this isn't it
+        if [[ -n "$selected_platform" ]]; then
+            # Extract the board name from FQBN (last part after last colon)
+            local board_name=$(echo "$platform_fqbn" | rev | cut -d':' -f1 | rev)
+            
+            # Check if selected platform matches either board name, display name, or pio env
+            if [[ "$selected_platform" != "$board_name" ]] && 
+               [[ "$platform_name" != *"$selected_platform"* ]] &&
+               [[ "$platform_fqbn" != *"$selected_platform"* ]] &&
+               [[ "$pio_env" != *"$selected_platform"* ]]; then
+                continue
+            fi
+        fi
+        
+        print_status "INFO" "Testing platform: $platform_name (using $use_tool)"
         echo "----------------------------------------"
         
         for example_path in "${EXAMPLES[@]}"; do
-            test_compilation "$platform_fqbn" "$platform_name" "$example_path"
+            test_compilation "$platform_fqbn" "$platform_name" "$pio_env" "$example_path" "$use_tool"
         done
         
         echo ""
@@ -182,18 +265,39 @@ run_all_tests() {
 
 # Function to display summary
 show_summary() {
+    local platform="$1"
+    
     echo ""
     echo "======================================================="
     print_status "INFO" "Compilation Test Summary"
     echo "======================================================="
+    
+    if [[ -n "$platform" ]]; then
+        echo "Platform:     $platform"
+    else
+        echo "Platform:     All platforms"
+    fi
+    
     echo "Total Tests:  $TOTAL_TESTS"
     echo -e "Passed:       ${GREEN}$PASSED_TESTS${NC}"
     echo -e "Failed:       ${RED}$FAILED_TESTS${NC}"
     
-    if [ $FAILED_TESTS -eq 0 ]; then
+    if [ $TOTAL_TESTS -eq 0 ]; then
+        echo ""
+        print_status "WARNING" "No tests were executed!"
+        if [[ -n "$platform" ]]; then
+            echo "The specified platform '$platform' was not found."
+            echo "Use --help to see available platform options."
+        fi
+        exit 1
+    elif [ $FAILED_TESTS -eq 0 ]; then
         echo ""
         print_status "SUCCESS" "All compilation tests passed! 🎉"
-        echo "The SimpleFSM library is compatible with all tested platforms."
+        if [[ -n "$platform" ]]; then
+            echo "The SimpleFSM library is compatible with the tested platform."
+        else
+            echo "The SimpleFSM library is compatible with all tested platforms."
+        fi
     else
         echo ""
         print_status "ERROR" "Some compilation tests failed!"
@@ -206,48 +310,105 @@ show_summary() {
 show_help() {
     echo "SimpleFSM Library Compilation Test Script"
     echo ""
-    echo "Usage: $0 [OPTIONS]"
+    echo "Usage: $0 [OPTIONS] [PLATFORM]"
     echo ""
     echo "Options:"
-    echo "  -h, --help     Show this help message"
-    echo "  -v, --verbose  Enable verbose output"
-    echo "  -q, --quiet    Minimal output (errors only)"
+    echo "  -h, --help         Show this help message"
+    echo "  -v, --verbose      Enable verbose output"
+    echo "  -q, --quiet        Minimal output (errors only)"
+    echo "  --tool=TOOL        Use arduino-cli or pio (default: pio)"
     echo ""
-    echo "This script tests compilation of all SimpleFSM examples across:"
-    echo "  - Wemos D1 Mini (ESP8266)"
-    echo "  - M5Stack Core2 (ESP32)"
-    echo "  - Arduino Nano (AVR)"
+    echo "Platform (optional):"
+    echo "  If specified, tests only the selected platform. Can be:"
+    echo "  - Board name: d1_mini, m5stack_core2, nano"
+    echo "  - Display name: Wemos, M5Stack, Nano"
+    echo "  - FQBN substring: esp8266, esp32, avr"
+    echo "  - PIO environment: Wemos, M5Stack_ESP32, Nano"
+    echo ""
+    echo "Available platforms:"
+    echo "  - Wemos D1 Mini (ESP8266) - use: Wemos, d1_mini, or esp8266"
+    echo "  - M5Stack Core2 (ESP32) - use: M5Stack, m5stack_core2, or esp32"
+    echo "  - Arduino Nano (AVR) - use: Nano, nano, or avr"
+    echo ""
+    echo "Examples:"
+    echo "  $0                        # Test all platforms with PlatformIO"
+    echo "  $0 --tool=arduino-cli    # Test all platforms with Arduino CLI"
+    echo "  $0 Wemos                # Test only Wemos D1 Mini with PlatformIO"
+    echo "  $0 --tool=arduino-cli esp32  # Test only ESP32 with Arduino CLI"
+    echo "  $0 -v nano              # Test Arduino Nano with verbose output"
     echo ""
     echo "Prerequisites:"
-    echo "  - arduino-cli must be installed and in PATH"
-    echo "  - Required Arduino cores must be installed"
+    echo "  - PlatformIO (pio) or arduino-cli must be installed and in PATH"
+    echo "  - For Arduino CLI: Required Arduino cores must be installed"
+    echo "  - For PlatformIO: Platforms will be installed automatically"
     echo ""
 }
 
 # Main execution
 main() {
+    local verbose_mode=""
+    local quiet_mode=""
+    local platform=""
+    local use_tool="pio"  # Default to PlatformIO
+    
     # Parse command line arguments
-    case "${1:-}" in
-        -h|--help)
-            show_help
-            exit 0
-            ;;
-        -v|--verbose)
-            set -x
-            ;;
-        -q|--quiet)
-            exec > /dev/null 2>&1
-            ;;
-    esac
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            -v|--verbose)
+                verbose_mode="1"
+                set -x
+                shift
+                ;;
+            -q|--quiet)
+                quiet_mode="1"
+                exec > /dev/null 2>&1
+                shift
+                ;;
+            --tool=*)
+                use_tool="${1#*=}"
+                if [[ "$use_tool" != "pio" && "$use_tool" != "arduino-cli" ]]; then
+                    print_status "ERROR" "Invalid tool: $use_tool. Must be 'pio' or 'arduino-cli'"
+                    exit 1
+                fi
+                shift
+                ;;
+            -*)
+                print_status "ERROR" "Unknown option: $1"
+                show_help
+                exit 1
+                ;;
+            *)
+                if [[ -z "$platform" ]]; then
+                    platform="$1"
+                else
+                    print_status "ERROR" "Multiple platforms specified: $platform and $1"
+                    show_help
+                    exit 1
+                fi
+                shift
+                ;;
+        esac
+    done
     
     # Change to script directory
     cd "$(dirname "$0")"
     
+    # Show configuration
+    print_status "INFO" "Using build tool: $use_tool"
+    if [[ -n "$platform" ]]; then
+        print_status "INFO" "Testing selected platform: $platform"
+    fi
+    echo ""
+    
     # Run the test suite
-    check_prerequisites
-    check_cores
-    run_all_tests
-    show_summary
+    check_prerequisites "$use_tool"
+    check_cores "$use_tool"
+    run_all_tests "$platform" "$use_tool"
+    show_summary "$platform"
 }
 
 # Execute main function with all arguments
