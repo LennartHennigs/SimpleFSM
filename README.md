@@ -3,7 +3,7 @@
 Arduino/ESP library to simplify setting up and running a state machine.
 
 * Author: Lennart Hennigs (<https://www.lennarthennigs.de>)
-* Copyright (C) 2022-2025 Lennart Hennigs.
+* Copyright (C) 2022-2026 Lennart Hennigs.
 * Released under the MIT license.
 
 ## Description
@@ -12,7 +12,7 @@ This library allows you to quickly setup a State Machine. Read here [what a stat
 
 It has been tested with Arduino, ESP8266 and ESP32 devices.
 
-⚠️ To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/master/CHANGELOG.md).
+⚠️ To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/main/CHANGELOG.md).
 
 If you find this library helpful please consider giving it a ⭐️ at [GitHub](https://github.com/LennartHennigs/SimpleFSM) and/or [buy me a ☕️](https://ko-fi.com/lennart0815). Thanks!
 
@@ -30,9 +30,7 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
 * Definition of an in_state interval
 * Functions for tracking the behavior and progress of the state machine
 * Creation of a `Graphviz` source file of your state machine definition
-* TBD: Storage of the current state on files with `LittleFS` or SD card storage (TBD)
-  
-⚠️ To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/master/CHANGELOG.md).
+⚠️ To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/main/CHANGELOG.md).
 
 ## How To Use
 
@@ -41,7 +39,7 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
 * Pass the transitions to your state machine
 * Define an initial state
 * ...and add the `run()` function in your loop
-* See [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino) for a basic example
+* See [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/SimpleTransitions/SimpleTransitions.ino) for a basic example
 
 ### Defining States
 
@@ -61,7 +59,7 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
 ```
 
 * Most states will have the entry handler
-* The easiest way to define states is creating using an array, e.g. as shown in [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino):
+* The easiest way to define states is creating using an array, e.g. as shown in [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/MixedTransitions/MixedTransitions.ino):
   
   ```c++
   State s[] = {
@@ -73,15 +71,15 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
 
 * The initial state **must** of the state machine must be defined – either via the constructor or the `setup()` function or via the `setInitialState()` function
 * None, one, or multiple states can be defined as an end state via `setAsFinal()`
-* For the full `State` class definition see [State.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/State.h)
+* For the full `State` class definition see [State.h](https://github.com/LennartHennigs/SimpleFSM/blob/main/src/State.h)
 
 ### Transitions
 
 * This library offers two types of Transitions, regular and timed ones
 * All transitions must have a from and and a to state
 * Transitions can have a callback function for when the transition is executed, a name, and a [guard condition](#guard-conditions)
-* You can add both types to a state machine, see [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino) for an example
-* See [Transitions.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/Transitions.h) for the class definitions of `Transition` and `TimedTransition`.
+* You can add both types to a state machine, see [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/MixedTransitions/MixedTransitions.ino) for an example
+* See [Transitions.h](https://github.com/LennartHennigs/SimpleFSM/blob/main/src/Transitions.h) for the class definitions of `Transition` and `TimedTransition`.
 * Note: Both classes are based of an abstract class which is not to be used in your code.
 
 ### Regular Transitions
@@ -177,7 +175,7 @@ fsm.add(regular_transitions, 2);
 fsm.addGlobalTransition(&error_state, ERROR_EVENT);    // Any state -> Error
 ```
 
-* See [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitions/SimpleTransitions.ino) and [SimpleTransitionWithButtons.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitionWithButton/SimpleTransitionWithButton.ino) for more details
+* See [GlobalTransitionsSimple.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/GlobalTransitionsSimple/GlobalTransitionsSimple.ino) and [GlobalTransitionHelpers.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/GlobalTransitionHelpers/GlobalTransitionHelpers.ino) for more details
 
 ### Timed Transitions
 
@@ -203,7 +201,7 @@ fsm.addGlobalTransition(&error_state, ERROR_EVENT);    // Any state -> Error
   };
   ```
 
-* See [TimedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/TimedTransitions/TimedTransitions.ino) for more details
+* See [TimedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/TimedTransitions/TimedTransitions.ino) for more details
 
 ### Guard Conditions
 
@@ -227,7 +225,7 @@ fsm.addGlobalTransition(&error_state, ERROR_EVENT);    // Any state -> Error
   }
   ```
 
-* See [Guards.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/Guards/Guards.ino) for a complete example
+* See [Guards.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/Guards/Guards.ino) for a complete example
 
 ### In-State Interval
 
@@ -257,7 +255,7 @@ fsm.addGlobalTransition(&error_state, ERROR_EVENT);    // Any state -> Error
     State* getState() const;
     State* getPreviousState() const;
     bool isInState(State* state) const;
-    int lastTransitionedAt() const;
+    unsigned long lastTransitioned() const;
     bool isFinished() const;
 
   ```
@@ -265,7 +263,7 @@ fsm.addGlobalTransition(&error_state, ERROR_EVENT);    // Any state -> Error
 ### GraphViz Generation
 
 * Use the function `getDotDefinition()` to get your state machine definition in the GraphViz [dot format](https://www.graphviz.org/doc/info/lang.html)
-* Here the output for the [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino) example:
+* Here the output for the [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/MixedTransitions/MixedTransitions.ino) example:
   
   ```c++
     digraph G {
@@ -280,47 +278,46 @@ fsm.addGlobalTransition(&error_state, ERROR_EVENT);    // Any state -> Error
   ```
 
 * You can use this visualize your state machine:\
-  ![MixedTransitions.ino example](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.svg?raw=true)
+  ![MixedTransitions.ino example](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/MixedTransitions/MixedTransitions.svg?raw=true)
 
 * If the machine is running, the current state will be highlighted
 * Currently guard functions and end states are not shown in the graph
-* See [MixedTransitionsBrowser.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitionsBrowser/MixedTransitionsBrowser.ino) to learn how to run a webserver to show the Graphviz diagram of your state machine
+* See [MixedTransitionsBrowser.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/MixedTransitionsBrowser/MixedTransitionsBrowser.ino) to learn how to run a webserver to show the Graphviz diagram of your state machine
 
 ### Utility Helpers for Many-to-One Transitions
 
 To easily create transitions from multiple source states to a single target state, use the helpers in `FSMUtils.h`:
 
-```c++
 ```cpp
 #include "FSMUtils.h"
 
 // Regular transitions
-createManyToOneTransitions(sources, num_sources, target, event_id, out_array);
+FSMUtils::createManyToOneTransitions(sources, num_sources, target, event_id, out_array);
 
 // Timed transitions
-createManyToOneTimedTransitions(sources, num_sources, target, interval, out_array);
+FSMUtils::createManyToOneTimedTransitions(sources, num_sources, target, interval, out_array);
 ```
 
 See `ManyToOneTransitionExample.ino` for a complete usage example.
 
 ## Class Definitions
 
-* [State.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/State.h)
-* [Transitions.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/Transitions.h) for the class definition of both transitions
-* [SimpleFSM](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/SimpleFSM.h)
-* [FSMUtils.h](https://github.com/LennartHennigs/SimpleFSM/blob/master/src/FSMUtils.h) - utility helpers for generating many-to-one transitions
+* [State.h](https://github.com/LennartHennigs/SimpleFSM/blob/main/src/State.h)
+* [Transitions.h](https://github.com/LennartHennigs/SimpleFSM/blob/main/src/Transitions.h) for the class definition of both transitions
+* [SimpleFSM](https://github.com/LennartHennigs/SimpleFSM/blob/main/src/SimpleFSM.h)
+* [FSMUtils.h](https://github.com/LennartHennigs/SimpleFSM/blob/main/src/FSMUtils.h) - utility helpers for generating many-to-one transitions
 
 ## Examples
 
-* [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitions/SimpleTransitions.ino) - only regular transitions and showcasing the different events
-* [SimpleTransitionWithButtons.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/SimpleTransitionWithButton/SimpleTransitionWithButton.ino) - event is now triggered via a hardware button
-* [TimedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/TimedTransitions/TimedTransitions.ino) - showcasing timed transitions
-* [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitions/MixedTransitions.ino) - regular and timed transitions
-* [MixedTransitionsBrowser.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/MixedTransitionsBrowser/MixedTransitionsBrowser.ino) - creates a webserver to show the Graphviz diagram of the state machine
-* [Guards.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/Guards/Guards.ino) - showing how to define guard functions
-* [ManyToOneTransitionExample.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/ManyToOneTransitionExample/ManyToOneTransitionExample.ino) - demonstrates utility helpers for creating many-to-one transitions
-* [GlobalTransitionsSimple.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/GlobalTransitionsSimple/GlobalTransitionsSimple.ino) - demonstrates global transitions using the addGlobalTransition() helper functions
-* [GlobalTransitionHelpers.ino](https://github.com/LennartHennigs/SimpleFSM/blob/master/examples/GlobalTransitionHelpers/GlobalTransitionHelpers.ino) - complete demonstration of global transition helper functions including timed global transitions
+* [SimpleTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/SimpleTransitions/SimpleTransitions.ino) - only regular transitions and showcasing the different events
+* [SimpleTransitionWithButtons.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/SimpleTransitionWithButton/SimpleTransitionWithButton.ino) - event is now triggered via a hardware button
+* [TimedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/TimedTransitions/TimedTransitions.ino) - showcasing timed transitions
+* [MixedTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/MixedTransitions/MixedTransitions.ino) - regular and timed transitions
+* [MixedTransitionsBrowser.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/MixedTransitionsBrowser/MixedTransitionsBrowser.ino) - creates a webserver to show the Graphviz diagram of the state machine
+* [Guards.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/Guards/Guards.ino) - showing how to define guard functions
+* [ManyToOneTransitionExample.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/ManyToOneTransitionExample/ManyToOneTransitionExample.ino) - demonstrates utility helpers for creating many-to-one transitions
+* [GlobalTransitionsSimple.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/GlobalTransitionsSimple/GlobalTransitionsSimple.ino) - demonstrates global transitions using the addGlobalTransition() helper functions
+* [GlobalTransitionHelpers.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/GlobalTransitionHelpers/GlobalTransitionHelpers.ino) - complete demonstration of global transition helper functions including timed global transitions
 
 ## Testing
 
@@ -388,7 +385,7 @@ pio test -e Nano_test            # Real Arduino Nano hardware
 ## Notes
 
 * This library is heavily inspired by the [Arduino-fsm](https://github.com/jonblack/arduino-fsm) library created by [Jon Black](https://github.com/jonblack). I initially used some of his as a base. Without Jon's work this library would not exist.
-* To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/master/CHANGELOG.md).
+* To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/main/CHANGELOG.md).
 * And if you find this library helpful, please consider giving it a star at [GitHub](https://github.com/LennartHennigs/SimpleFSM). Thanks!
 
 ## Migrating from v1.x to v2.0
@@ -519,13 +516,13 @@ void setup() {
 ## How To Install
 
 Open the Arduino IDE choose "Sketch > Include Library" and search for "SimpleFSM".
-Or download the ZIP archive (<https://github.com/lennarthennigs/SimpleFSM/zipball/master>), and choose "Sketch > Include Library > Add .ZIP Library..." and select the downloaded file.
+Or download the ZIP archive (<https://github.com/lennarthennigs/SimpleFSM/zipball/main>), and choose "Sketch > Include Library > Add .ZIP Library..." and select the downloaded file.
 
 ## License
 
 MIT License
 
-Copyright (c) 2025 Lennart Hennigs
+Copyright (c) 2022-2026 Lennart Hennigs
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

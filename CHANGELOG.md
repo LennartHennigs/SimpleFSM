@@ -1,8 +1,8 @@
 # Changelog
 
-**Note:** Unreleased changes are checked in but not part of an official release (available through the Arduino IDE or PlatfomIO) yet. This allows you to test WiP features and give feedback to them.
-
 ## Unreleased
+
+## 2.0.0 - 2026-02-26
 
 - Breaking API changes
   - FSM now requires states to be passed as arrays of pointers (`State*[]`), not arrays of objects.
@@ -54,8 +54,6 @@
   - Added comprehensive migration guide from v1.x to v2.0 in README.md with step-by-step instructions.
   - Added CLAUDE.md - AI assistant reference guide with Arduino/PlatformIO constraints and best practices.
   - Enhanced README with migration checklist, before/after code examples, and rationale for changes.
-  - checks whether names are unique
-  - determines if in end state
 - Added functions
   - `getStateByName()`
   - `getLastTransition()`
