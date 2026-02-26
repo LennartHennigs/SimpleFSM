@@ -16,9 +16,9 @@ void stateEnter() {
   // Placeholder callback function
 }
 
-State normal;
-State emergency;  
-State maintenance;
+State normal("NORMAL", stateEnter);
+State emergency("EMERGENCY", stateEnter);
+State maintenance("MAINTENANCE", stateEnter);
 
 SimpleFSM fsm;
 
@@ -31,11 +31,7 @@ SimpleFSM fsm;
 void setup() {
   Serial.begin(9600);
   Serial.println("SimpleFSM Global Transition Helper Demo");
-  
-  normal.setup("NORMAL", stateEnter);
-  emergency.setup("EMERGENCY", stateEnter);
-  maintenance.setup("MAINTENANCE", stateEnter);
-  
+
   fsm.setInitialState(&normal);
   
   State* allStates[] = {&normal, &emergency, &maintenance};
