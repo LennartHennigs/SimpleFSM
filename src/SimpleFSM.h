@@ -67,7 +67,7 @@ class SimpleFSM {
     int getStateCount() const;
     
     bool isFinished() const;
-    State* getState() const;
+    State* getState();
     bool isInState(State* state) const;
     State* getPreviousState() const;
     AbstractTransition* getLastTransition() const;

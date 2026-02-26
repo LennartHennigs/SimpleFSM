@@ -158,10 +158,9 @@ State* SimpleFSM::getPreviousState() const {
 
 /////////////////////////////////////////////////////////////////
 
-State* SimpleFSM::getState() const {
-  // Initialize FSM if needed to ensure current_state is set
+State* SimpleFSM::getState() {
   if (!is_initialized && initial_state != NULL) {
-    const_cast<SimpleFSM*>(this)->initFSM();
+    initFSM();
   }
   return current_state;
 }
@@ -430,7 +429,7 @@ FSMError SimpleFSM::addGlobalTimedTransition(State* to, unsigned long interval) 
 
 FSMError SimpleFSM::addGlobalTimedTransition(State* to, unsigned long interval, CallbackFunction callback) {
   // Validate input parameters
-  if (to == NULL || interval == INITIAL_ID_VALUE) {
+  if (to == NULL || interval == 0) {
     last_error = FSMError::INVALID_PARAMETER;
     return last_error;
   }
