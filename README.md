@@ -30,8 +30,7 @@ If you find this library helpful please consider giving it a ⭐️ at [GitHub](
 * Definition of an in_state interval
 * Functions for tracking the behavior and progress of the state machine
 * Creation of a `Graphviz` source file of your state machine definition
-⚠️ To see the latest changes to the library please take a look at the [Changelog](https://github.com/LennartHennigs/SimpleFSM/blob/main/CHANGELOG.md).
-
+  
 ## How To Use
 
 * You first need to define a set of states for your state machine
@@ -252,7 +251,7 @@ fsm.addGlobalTransition(&error_state, ERROR_EVENT);    // Any state -> Error
 * SimpleFSM provides a few functions to check on the state of the machine:
 
   ```c++
-    State* getState() const;
+    State* getState();
     State* getPreviousState() const;
     bool isInState(State* state) const;
     unsigned long lastTransitioned() const;
