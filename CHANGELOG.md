@@ -2,12 +2,13 @@
 
 ## Unreleased
 
-## 2.0.0 - 2026-02-26
+## 2.0.0 - 2026-05-09
 
 - Breaking API changes
   - FSM now requires states to be passed as arrays of pointers (`State*[]`), not arrays of objects.
   - `add()` methods now return `FSMError` instead of `void` for better error handling.
-  - `addUniqueState()` now returns `FSMError` instead of `void`.
+  - `addGlobalTransition()` / `addGlobalTimedTransition()` now return `INVALID_PARAMETER` if an identical global transition already exists, instead of silently continuing.
+  - `FSMError::NULL_POINTER` removed — it was never emitted; use `INVALID_PARAMETER` for null checks.
 - Added `FSMUtils.h` helper class – offers functions to generate many-to-one regular and timed transitions (see #26).
 - Added global transitions feature
   - Transitions can now use `NULL` as the source state to work from any state.
@@ -22,6 +23,8 @@
   - Timed transitions now correctly reset their timer on state re-entry (see #25).
   - Fixed constructor bug where `SimpleFSM()` call had no effect in parameterized constructor.
   - Improved pointer safety and memory management for states and transitions.
+  - `getState()` now returns `initial_state` before the FSM is first started or after `reset()`, instead of `NULL`. `isInState()` is consistent with this behaviour.
+  - `addUniqueState()` moved to `protected`; it is an internal helper and not part of the public API.
 - Added memory safety and bounds checking
   - Implemented configurable maximum limits for states, transitions, and timed transitions.
   - Added comprehensive input validation for all `add()` methods.
@@ -38,6 +41,8 @@
   - Enhanced code readability with descriptive constant names.
 - Updated examples
   - Added `ManyToOneTransitionExample.ino` to demonstrate usage new helpers (see #26).
+  - Added `NamedStateTransitions.ino` to demonstrate string-based state-name constructors for `Transition` and `TimedTransition`.
+  - Fixed `GlobalTransitionsSimple.ino` to use `fsm.add(states, n)` instead of the now-protected `addUniqueState()`.
   - Updated `SimpleTransitions.ino` to demonstrate error handling.
   - Added constants to some examples
   - They now use array of pointers for states

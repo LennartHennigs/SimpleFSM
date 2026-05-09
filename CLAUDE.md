@@ -96,7 +96,7 @@ fsm.run(interval_ms);               // call in loop(); default 1000ms
 fsm.reset();
 
 // Status
-fsm.getState();
+fsm.getState();          // returns initial_state before first run/trigger or after reset()
 fsm.getPreviousState();
 fsm.isInState(&state);
 fsm.isFinished();

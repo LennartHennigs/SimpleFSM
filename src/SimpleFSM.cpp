@@ -34,7 +34,6 @@ const char* SimpleFSM::getErrorString(FSMError error) const {
     case FSMError::OUT_OF_MEMORY: return "Out of memory";
     case FSMError::INVALID_PARAMETER: return "Invalid parameter";
     case FSMError::ARRAY_TOO_LARGE: return "Array size exceeds limits";
-    case FSMError::NULL_POINTER: return "Null pointer provided";
     default: return "Unknown error";
   }
 }
@@ -158,17 +157,14 @@ State* SimpleFSM::getPreviousState() const {
 
 /////////////////////////////////////////////////////////////////
 
-State* SimpleFSM::getState() {
-  if (!is_initialized && initial_state != NULL) {
-    initFSM();
-  }
-  return current_state;
+State* SimpleFSM::getState() const {
+  return current_state != NULL ? current_state : initial_state;
 }
 
 /////////////////////////////////////////////////////////////////
 
 bool SimpleFSM::isInState(State* t) const {
-  return t == current_state;
+  return t == getState();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -377,17 +373,18 @@ FSMError SimpleFSM::addGlobalTransition(State* to, int event_id, CallbackFunctio
   // Create a global transition using NULL as source state
   Transition globalTransition(NULL, to, event_id, callback);
   
-  // Check for existing global transitions with the same event ID (potential conflict)
+  // Reject any existing global transition with the same event ID, regardless of target.
+  // Two globals sharing an event ID would be ambiguous — only the first would ever fire.
+  // isDuplicate() is not used here because it also matches on 'to', which we intentionally ignore.
   if (transitions != NULL) {
     for (int i = 0; i < num_standard; i++) {
       if (transitions[i].from == NULL && transitions[i].event_id == event_id) {
-        // Found another global transition with same event ID - this could cause confusion
-        // Note: We continue anyway for backward compatibility, but only first one will trigger
-        break;
+        last_error = FSMError::INVALID_PARAMETER;
+        return last_error;
       }
     }
   }
-  
+
   // Add the destination state if not already present
   FSMError stateError = addUniqueState(to);
   if (stateError != FSMError::OK) {
@@ -443,17 +440,11 @@ FSMError SimpleFSM::addGlobalTimedTransition(State* to, unsigned long interval, 
   // Create a global timed transition using NULL as source state
   TimedTransition globalTimedTransition(NULL, to, interval, callback);
   
-  // Check for existing global timed transitions with the same interval and destination
-  if (timed != NULL) {
-    for (int i = 0; i < num_timed; i++) {
-      if (timed[i].from == NULL && timed[i].to == to && timed[i].interval == interval) {
-        // Found another global timed transition with same destination and interval
-        // Note: We continue anyway for backward compatibility, but behavior may be unpredictable
-        break;
-      }
-    }
+  if (isDuplicate(globalTimedTransition, timed, num_timed)) {
+    last_error = FSMError::INVALID_PARAMETER;
+    return last_error;
   }
-  
+
   // Add the destination state if not already present
   FSMError stateError = addUniqueState(to);
   if (stateError != FSMError::OK) {
@@ -487,18 +478,6 @@ FSMError SimpleFSM::addGlobalTimedTransition(State* to, unsigned long interval, 
 
 /////////////////////////////////////////////////////////////////
 
-bool SimpleFSM::isStateInArray(State* state, State* stateArray[], int arraySize) {
-  for (int i = 0; i < arraySize; i++) {
-    if (stateArray[i] == state) {
-      return true;
-    }
-  }
-  return false;
-}
-
-
-/////////////////////////////////////////////////////////////////
- 
 bool SimpleFSM::isDuplicate(const TimedTransition& transition, const TimedTransition* transitionArray, int arraySize) const {
   for (int i = 0; i < arraySize; ++i) {
     if (transitionArray[i].from == transition.from &&

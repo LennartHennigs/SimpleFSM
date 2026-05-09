@@ -126,9 +126,7 @@ void setup() {
   fsm.setInitialState(&idleState);
   
   // Add all states
-  for (int i = 0; i < 4; i++) {
-    fsm.addUniqueState(states[i]);
-  }
+  fsm.add(states, 4);
   
   // Add regular transitions
   fsm.add(regularTransitions, 2);  

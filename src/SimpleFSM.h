@@ -25,8 +25,7 @@ enum class FSMError {
   OK,
   OUT_OF_MEMORY,
   INVALID_PARAMETER,
-  ARRAY_TOO_LARGE,
-  NULL_POINTER
+  ARRAY_TOO_LARGE
 };
 
 /////////////////////////////////////////////////////////////////
@@ -46,8 +45,7 @@ class SimpleFSM {
     FSMError add(Transition t[], int size);
     FSMError add(TimedTransition t[], int size);
     FSMError add(State* states[], int size);
-    FSMError addUniqueState(State* state);
-    
+
     // Global transition helpers - transitions that work from any state
     FSMError addGlobalTransition(State* to, int event_id);
     FSMError addGlobalTransition(State* to, int event_id, CallbackFunction callback);
@@ -67,7 +65,7 @@ class SimpleFSM {
     int getStateCount() const;
     
     bool isFinished() const;
-    State* getState();
+    State* getState() const;
     bool isInState(State* state) const;
     State* getPreviousState() const;
     AbstractTransition* getLastTransition() const;
@@ -123,6 +121,8 @@ class SimpleFSM {
 
     friend class FSMTestHelper;
 
+    FSMError addUniqueState(State* state);
+
     bool isDuplicate(const TimedTransition& transition, const TimedTransition* transitionArray, int arraySize) const;
     bool isDuplicate(const Transition& transition, const Transition* transitionArray, int arraySize) const;
 
@@ -144,7 +144,7 @@ class SimpleFSM {
     String getDOTInitialState();
     String getDOTActiveNode();
 
-    bool isStateInArray(State* state, State* stateArray[], int arraySize);
+
 };
 
 /////////////////////////////////////////////////////////////////
