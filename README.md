@@ -176,6 +176,28 @@ fsm.addGlobalTransition(&error_state, ERROR_EVENT);    // Any state -> Error
 
 * See [GlobalTransitionsSimple.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/GlobalTransitionsSimple/GlobalTransitionsSimple.ino) and [GlobalTransitionHelpers.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/GlobalTransitionHelpers/GlobalTransitionHelpers.ino) for more details
 
+### Named State Transitions
+
+Instead of passing `State*` pointers, you can define transitions using state **names** (strings). Names are resolved automatically on the first `run()` or `trigger()` call, so transitions and states can be declared in any order:
+
+```cpp
+// Transitions declared by name — no State* pointers needed at this point
+Transition transitions[] = {
+  Transition("Standby", "Brewing", BREW_BUTTON),
+  Transition("Ready",   "Standby", COFFEE_TAKEN),
+};
+TimedTransition timedTransitions[] = {
+  TimedTransition("Brewing", "Ready", BREW_TIME_MS),
+};
+
+// States defined afterwards — order doesn't matter
+State standby("Standby", onEnterStandby);
+State brewing("Brewing", onEnterBrewing);
+State ready  ("Ready",   onEnterReady);
+```
+
+* See [NamedStateTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/NamedStateTransitions/NamedStateTransitions.ino) for a complete example
+
 ### Timed Transitions
 
 ```c++
@@ -317,6 +339,7 @@ See `ManyToOneTransitionExample.ino` for a complete usage example.
 * [ManyToOneTransitionExample.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/ManyToOneTransitionExample/ManyToOneTransitionExample.ino) - demonstrates utility helpers for creating many-to-one transitions
 * [GlobalTransitionsSimple.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/GlobalTransitionsSimple/GlobalTransitionsSimple.ino) - demonstrates global transitions using the addGlobalTransition() helper functions
 * [GlobalTransitionHelpers.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/GlobalTransitionHelpers/GlobalTransitionHelpers.ino) - complete demonstration of global transition helper functions including timed global transitions
+* [NamedStateTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/NamedStateTransitions/NamedStateTransitions.ino) - demonstrates string-based state-name constructors for `Transition` and `TimedTransition`
 
 ## Testing
 
