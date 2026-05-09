@@ -4,7 +4,11 @@ TimedTransition	KEYWORD1
 State	KEYWORD1
 CallbackFunction	KEYWORD1
 GuardCondition	KEYWORD1
+FSMError	KEYWORD1
 add	KEYWORD2
+addGlobalTransition	KEYWORD2
+addGlobalTimedTransition	KEYWORD2
+addUniqueState	KEYWORD2
 setInitialState	KEYWORD2
 setFinishedHandler	KEYWORD2
 setTransitionHandler	KEYWORD2
@@ -13,6 +17,11 @@ run	KEYWORD2
 reset	KEYWORD2
 getState	KEYWORD2
 getPreviousState	KEYWORD2
+getStateCount	KEYWORD2
+getStateByName	KEYWORD2
+getLastError	KEYWORD2
+hasError	KEYWORD2
+getErrorString	KEYWORD2
 isInState	KEYWORD2
 isFinished	KEYWORD2
 lastTransitioned	KEYWORD2

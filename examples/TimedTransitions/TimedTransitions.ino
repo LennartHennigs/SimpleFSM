@@ -10,6 +10,13 @@
 
 /////////////////////////////////////////////////////////////////
 
+#define SERIAL_SPEED 115200
+
+#define TIME_TO_RED 6000
+#define TIME_TO_GREEN 4000
+
+/////////////////////////////////////////////////////////////////
+
 SimpleFSM fsm;
 
 /////////////////////////////////////////////////////////////////
@@ -28,22 +35,21 @@ void ongoing() {
 /////////////////////////////////////////////////////////////////
 
 
-State s[] = {
-  State("red", on_red /*, ongoing */),
-  State("green", on_green, ongoing)
-};
+
+State s_red("red", on_red /*, ongoing */);
+State s_green("green", on_green, ongoing);
+State* states[] = { &s_red, &s_green };
 
 TimedTransition timedTransitions[] = {
-  TimedTransition(&s[0], &s[1], 6000),
-  TimedTransition(&s[1], &s[0], 4000),
+  TimedTransition(states[0], states[1], TIME_TO_RED),
+  TimedTransition(states[1], states[0], TIME_TO_GREEN)
 };
-
 int num_timed = sizeof(timedTransitions) / sizeof(TimedTransition);
 
 /////////////////////////////////////////////////////////////////
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(SERIAL_SPEED);
   while (!Serial) {
     delay(300);
   }
@@ -51,7 +57,7 @@ void setup() {
   Serial.println("SimpleFSM - Timed Transition (Simple traffic light)\n");
     
   fsm.add(timedTransitions, num_timed);
-  fsm.setInitialState(&s[0]);
+  fsm.setInitialState(states[0]);
 }
 
 /////////////////////////////////////////////////////////////////

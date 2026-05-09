@@ -66,24 +66,23 @@ void on_button_press() {
 
 /////////////////////////////////////////////////////////////////
 
-State s[] = {
-  State("red light", on_red, ongoing),
-  State("green light", on_green, ongoing),
-  State("button pressed", on_button_press, ongoing)
-};
+State s_red("red light", on_red, ongoing);
+State s_green("green light", on_green, ongoing);
+State s_button("button pressed", on_button_press, ongoing);
+State* states[] = { &s_red, &s_green, &s_button };
 
 enum triggers {
   button_was_pressed = 1  
 };
 
 Transition transitions[] = {
-  Transition(&s[0], &s[2], button_was_pressed)
+  Transition(states[0], states[2], button_was_pressed)
 };
 
 TimedTransition timedTransitions[] = {
-  TimedTransition(&s[0], &s[1], 6000),
-  TimedTransition(&s[1], &s[0], 4000),
-  TimedTransition(&s[2], &s[1], 1000)
+  TimedTransition(states[0], states[1], 6000),
+  TimedTransition(states[1], states[0], 4000),
+  TimedTransition(states[2], states[1], 1000)
 };
 
 int num_transitions = sizeof(transitions) / sizeof(Transition);
@@ -127,7 +126,7 @@ void setup() {
   fsm.add(timedTransitions, num_timed);
   fsm.add(transitions, num_transitions);
   
-  fsm.setInitialState(&s[0]);
+  fsm.setInitialState(states[0]);
 
   btn.begin(BUTTON_PIN);
   btn.setTapHandler(button_handler); 

@@ -20,68 +20,131 @@ typedef bool (*GuardCondition)();
 
 /////////////////////////////////////////////////////////////////
 
+// Error codes for better error handling
+enum class FSMError {
+  OK,
+  OUT_OF_MEMORY,
+  INVALID_PARAMETER,
+  ARRAY_TOO_LARGE
+};
+
+/////////////////////////////////////////////////////////////////
+
+// forward declaration
+class FSMTestHelper;
+
+/////////////////////////////////////////////////////////////////
+
+
 class SimpleFSM {
- public:
-  SimpleFSM();
-  SimpleFSM(State* initial_state);
-  ~SimpleFSM();
+  public:
+    SimpleFSM();
+    SimpleFSM(State* initial_state);
+    ~SimpleFSM();
 
-  void add(Transition t[], int size);
-  void add(TimedTransition t[], int size);
+    FSMError add(Transition t[], int size);
+    FSMError add(TimedTransition t[], int size);
+    FSMError add(State* states[], int size);
 
-  void setInitialState(State* state);
-  void setFinishedHandler(CallbackFunction f);
-  void setTransitionHandler(CallbackFunction f);
+    // Global transition helpers - transitions that work from any state
+    FSMError addGlobalTransition(State* to, int event_id);
+    FSMError addGlobalTransition(State* to, int event_id, CallbackFunction callback);
+    FSMError addGlobalTimedTransition(State* to, unsigned long interval);
+    FSMError addGlobalTimedTransition(State* to, unsigned long interval, CallbackFunction callback);
 
-  bool trigger(int event_id);
-  void run(int interval = 1000, CallbackFunction tick_cb = NULL);
-  void reset();
+    void setInitialState(State* state);
+    void setFinishedHandler(CallbackFunction f);
+    void setTransitionHandler(CallbackFunction f);
 
-  int getTransitionCount() const;
-  int getTimedTransitionCount() const;
-  
-  bool isFinished() const;
-  State* getState() const;
-  bool isInState(State* state) const;
-  State* getPreviousState() const;
-  unsigned long lastTransitioned() const;
-  String getDotDefinition();
+    bool trigger(int event_id);
+    void run(int interval = DEFAULT_RUN_INTERVAL_MS, CallbackFunction tick_cb = NULL);
+    void reset();
+
+    int getTransitionCount() const;
+    int getTimedTransitionCount() const;
+    int getStateCount() const;
+    
+    bool isFinished() const;
+    State* getState() const;
+    bool isInState(State* state) const;
+    State* getPreviousState() const;
+    AbstractTransition* getLastTransition() const;
+    unsigned long lastTransitioned() const;
+    String getDotDefinition(bool showActive = true);
+
+    // Error handling methods
+    FSMError getLastError() const;
+    bool hasError() const;
+    const char* getErrorString(FSMError error) const;
 
  protected:
-  int num_timed = 0;
-  int num_standard = 0;
-  Transition* transitions = NULL;
-  TimedTransition* timed = NULL;
+    // Safety limits to prevent excessive memory allocation
+    static constexpr int MAX_TRANSITIONS = 100;
+    static constexpr int MAX_TIMED_TRANSITIONS = 50;
+    static constexpr int MAX_STATES = 50;
+    
+    // Default timing constants
+    static constexpr int DEFAULT_RUN_INTERVAL_MS = 1000;
+    
+    // DOT graph formatting constants
+    static constexpr const char* DOT_NODE_WIDTH = "1.5";
+    static constexpr const char* DOT_PAD_VALUE = "0.5";
+    
+    // Reset/initialization values
+    static constexpr unsigned long TIMESTAMP_RESET_VALUE = 0;
+    static constexpr int INITIAL_ID_VALUE = 0;
+    static constexpr int ARRAY_INCREMENT = 1;
+    bool isSetupOK() const;
+    int num_timed = INITIAL_ID_VALUE;
+    int num_standard = INITIAL_ID_VALUE;
+    int num_states = INITIAL_ID_VALUE;
+    Transition* transitions = NULL;
+    TimedTransition* timed = NULL;
+    State** states = NULL;
 
-  bool is_initialized = false;
-  bool is_finished = false;
-  unsigned long last_run = 0;
-  unsigned long last_transition = 0;
+    bool is_initialized = false;
+    bool is_finished = false;
+    unsigned long last_run = TIMESTAMP_RESET_VALUE;
+    unsigned long last_transition = TIMESTAMP_RESET_VALUE;
+    AbstractTransition* last_transition_ptr = NULL;
 
-  State* inital_state = NULL;
-  State* current_state = NULL;
-  State* prev_state = NULL;
-  CallbackFunction on_transition_cb = NULL;
-  CallbackFunction finished_cb = NULL;
+    // Error tracking
+    FSMError last_error = FSMError::OK;
 
-  String dot_definition = "";
+    State* initial_state = NULL;
+    State* current_state = NULL;
+    State* prev_state = NULL;
+    CallbackFunction on_transition_cb = NULL;
+    CallbackFunction finished_cb = NULL;
 
-  bool _isDuplicate(const TimedTransition& transition, const TimedTransition* transitionArray, int arraySize) const;
-  bool _isDuplicate(const Transition& transition, const Transition* transitionArray, int arraySize) const;
+    String dot_definition = "";
 
-  bool _isTimeForRun(unsigned long now, int interval);
-  void _handleTimedEvents(unsigned long now);
-  
-  bool _initFSM();
-  bool _transitionTo(AbstractTransition* transition);
-  bool _changeToState(State* s, unsigned long now);
+    friend class FSMTestHelper;
 
-  void _addDotTransition(Transition& t);
-  void _addDotTransition(TimedTransition& t);
-  String _dot_transition(String from, String to, String label, String param);
-  String _dot_inital_state();
-  String _dot_header();
-  String _dot_active_node();
+    FSMError addUniqueState(State* state);
+
+    bool isDuplicate(const TimedTransition& transition, const TimedTransition* transitionArray, int arraySize) const;
+    bool isDuplicate(const Transition& transition, const Transition* transitionArray, int arraySize) const;
+
+    bool isTimeForRun(unsigned long now, int interval);
+    void handleTimedEvents(unsigned long now);
+
+    State* getStateByName(String name);
+
+    bool initFSM();
+    bool transitionTo(AbstractTransition* transition);
+
+    bool changeToState(State* s, unsigned long now);
+    void checkAndInitializeTransitions();
+
+    String getDOTHeader();
+    void addDOTTransition(Transition& t);
+    void addDOTTransition(TimedTransition& t);
+    String getDOTTransition(String from, String to, String label, String param);
+    String getDOTInitialState();
+    String getDOTActiveNode();
+
+
 };
 
 /////////////////////////////////////////////////////////////////
