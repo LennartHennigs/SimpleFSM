@@ -983,6 +983,305 @@ test(GitHubIssues, GlobalTransitionsWithStringSafety) {
 }
 
 //////////////////////////////////////////////////////////////////
+// Phase 8: Named State Transitions (string-based)
+//////////////////////////////////////////////////////////////////
+
+// Bug: addDOTTransition() dereferences t.to before names are resolved.
+// A named-transition FSM must produce a DOT graph with the correct node
+// names (and must not crash) even before the first run()/trigger().
+test(NamedTransitions, DOTGenerationWithNames) {
+    resetCounters();
+
+    State standby("Standby", onEnterCallback);
+    State brewing("Brewing", onEnterCallback);
+    SimpleFSM fsm;
+
+    State* states[] = { &standby, &brewing };
+    assertEqual((int)fsm.add(states, 2), (int)FSMError::OK);
+
+    Transition trans[] = { Transition("Standby", "Brewing", 1) };
+    assertEqual((int)fsm.add(trans, 1), (int)FSMError::OK);
+    fsm.setInitialState(&standby);
+
+    String dot = fsm.getDotDefinition();
+    assertTrue(dot.indexOf("Standby") >= 0);
+    assertTrue(dot.indexOf("Brewing") >= 0);
+    // The from-node must be "Standby", never mislabelled "GLOBAL".
+    assertTrue(dot.indexOf("GLOBAL") < 0);
+}
+
+// Bug: isDuplicate() compares NULL from/to pointers, so two DIFFERENT named
+// transitions that share an event id are wrongly treated as duplicates and
+// the second is silently dropped.
+test(NamedTransitions, DistinctSharedEventNotDeduped) {
+    resetCounters();
+
+    State a("A", onEnterCallback);
+    State b("B", onEnterCallback);
+    State c("C", onEnterCallback);
+    SimpleFSM fsm;
+
+    State* states[] = { &a, &b, &c };
+    assertEqual((int)fsm.add(states, 3), (int)FSMError::OK);
+
+    // Same event id (1), different source/target states.
+    Transition trans[] = {
+        Transition("A", "B", 1),
+        Transition("B", "C", 1),
+    };
+    assertEqual((int)fsm.add(trans, 2), (int)FSMError::OK);
+    assertEqual(fsm.getTransitionCount(), 2);   // neither must be dropped
+
+    fsm.setInitialState(&a);
+    fsm.run(10);
+    assertTrue(fsm.trigger(1));                  // A -> B
+    assertEqual(fsm.getState(), &b);
+    assertTrue(fsm.trigger(1));                  // B -> C
+    assertEqual(fsm.getState(), &c);
+}
+
+// Bug: an unknown fromStateName resolves to NULL, which the FSM treats as a
+// global transition firing from ANY state. A typo'd source must instead make
+// the transition inert, not fire from an unrelated state.
+test(NamedTransitions, UnknownFromNameIsNotGlobal) {
+    resetCounters();
+
+    State a("A", onEnterCallback);
+    State b("B", onEnterCallback);
+    State other("Other", onEnterCallback);
+    SimpleFSM fsm;
+
+    State* states[] = { &a, &b, &other };
+    assertEqual((int)fsm.add(states, 3), (int)FSMError::OK);
+
+    // "Aa" does not exist among the states.
+    Transition trans[] = { Transition("Aa", "B", 1) };
+    assertEqual((int)fsm.add(trans, 1), (int)FSMError::OK);
+
+    fsm.setInitialState(&other);
+    fsm.run(10);
+    assertEqual(fsm.getState(), &other);
+
+    assertFalse(fsm.trigger(1));                 // must NOT fire from "Other"
+    assertEqual(fsm.getState(), &other);
+}
+
+//////////////////////////////////////////////////////////////////
+// Phase 9: API Coverage (previously untested public surface)
+//////////////////////////////////////////////////////////////////
+
+// Guards against regression of the CHANGELOG-documented constructor bug:
+// "SimpleFSM() call had no effect in parameterized constructor."
+test(APICoverage, ParameterizedConstructor) {
+    resetCounters();
+
+    State state1("State1", onEnterCallback);
+    State state2("State2", onEnterCallback);
+    SimpleFSM fsm(&state1);   // initial state via constructor
+
+    State* states[] = { &state1, &state2 };
+    assertEqual((int)fsm.add(states, 2), (int)FSMError::OK);
+
+    // Before the first run/trigger, getState() reflects the initial state.
+    assertEqual(fsm.getState(), &state1);
+
+    fsm.run(10);
+    assertEqual(fsm.getState(), &state1);
+    assertEqual(g_enter_count, 1);   // initial state entered on first run
+}
+
+// getLastTransition() must be NULL before any transition and point at the
+// executed transition afterwards.
+test(APICoverage, GetLastTransition) {
+    resetCounters();
+
+    State state1("State1", onEnterCallback);
+    State state2("State2", onEnterCallback);
+    SimpleFSM fsm;
+
+    State* states[] = { &state1, &state2 };
+    fsm.add(states, 2);
+    fsm.setInitialState(&state1);
+
+    Transition trans(&state1, &state2, 1, NULL, "go");
+    fsm.add(&trans, 1);
+    fsm.run(10);
+
+    assertTrue(fsm.getLastTransition() == NULL);   // nothing fired yet
+
+    assertTrue(fsm.trigger(1));
+    AbstractTransition* last = fsm.getLastTransition();
+    assertTrue(last != NULL);
+    assertEqual(last->getName(), "go");
+}
+
+// lastTransitioned() must reset at a transition and then grow with time.
+test(APICoverage, LastTransitioned) {
+    resetCounters();
+
+    State state1("State1", onEnterCallback);
+    State state2("State2", onEnterCallback);
+    SimpleFSM fsm;
+
+    State* states[] = { &state1, &state2 };
+    fsm.add(states, 2);
+    fsm.setInitialState(&state1);
+
+    Transition trans(&state1, &state2, 1);
+    fsm.add(&trans, 1);
+    fsm.run(10);
+    fsm.trigger(1);
+
+    unsigned long t1 = fsm.lastTransitioned();
+    delay(20);
+    unsigned long t2 = fsm.lastTransitioned();
+    assertTrue(t2 >= t1);
+    assertTrue(t2 >= 15);   // roughly the elapsed delay
+}
+
+// State setters must be equivalent to the constructor arguments.
+test(APICoverage, StateSetters) {
+    resetCounters();
+
+    State state1("Tmp", NULL);          // no callbacks yet
+    state1.setName("Start");
+    state1.setOnEnterHandler(onEnterCallback);
+    state1.setOnStateHandler(onStateCallback);
+    state1.setOnExitHandler(onExitCallback);
+
+    State state2("State2", onEnterCallback);
+    SimpleFSM fsm;
+
+    State* states[] = { &state1, &state2 };
+    fsm.add(states, 2);
+    fsm.setInitialState(&state1);
+
+    assertEqual(state1.getName(), "Start");
+
+    fsm.run(10);
+    assertEqual(g_enter_count, 1);      // setOnEnterHandler took effect
+
+    delay(15);
+    fsm.run(10);
+    assertEqual(g_state_count, 1);      // setOnStateHandler took effect
+
+    Transition trans(&state1, &state2, 1);
+    fsm.add(&trans, 1);
+    assertTrue(fsm.trigger(1));
+    assertEqual(g_exit_count, 1);       // setOnExitHandler took effect
+}
+
+// Transition setters (name, on-run, guard) must behave like the constructor
+// arguments; also exercises getEventID().
+test(APICoverage, TransitionSetters) {
+    resetCounters();
+
+    State state1("State1", onEnterCallback);
+    State state2("State2", onEnterCallback);
+    SimpleFSM fsm;
+
+    State* states[] = { &state1, &state2 };
+    fsm.add(states, 2);
+    fsm.setInitialState(&state1);
+
+    Transition trans(&state1, &state2, 7);   // no on-run / guard yet
+    trans.setName("jump");
+    trans.setOnRunHandler(onTransitionCallback);
+    trans.setGuardCondition(guardCondition);
+    assertEqual(trans.getEventID(), 7);
+
+    fsm.add(&trans, 1);
+    fsm.run(10);
+
+    // Guard blocks the transition.
+    g_guard_result = false;
+    assertFalse(fsm.trigger(7));
+    assertEqual(fsm.getState(), &state1);
+    assertEqual(g_transition_count, 0);   // on-run must not fire when blocked
+
+    // Guard allows the transition.
+    g_guard_result = true;
+    assertTrue(fsm.trigger(7));
+    assertEqual(fsm.getState(), &state2);
+    assertEqual(g_transition_count, 1);   // on-run fired
+}
+
+// getInterval() accessor and TimedTransition setters.
+test(APICoverage, TimedTransitionGettersAndSetters) {
+    resetCounters();
+
+    State state1("State1", onEnterCallback);
+    State state2("State2", onEnterCallback);
+    SimpleFSM fsm;
+
+    State* states[] = { &state1, &state2 };
+    fsm.add(states, 2);
+    fsm.setInitialState(&state1);
+
+    TimedTransition timed(&state1, &state2, 20);
+    timed.setName("timeout");
+    timed.setOnRunHandler(onTimerCallback);
+    assertEqual(timed.getInterval(), 20);
+
+    fsm.add(&timed, 1);
+
+    bool transitioned = false;
+    for (int i = 0; i < 50 && !transitioned; i++) {
+        fsm.run(5);
+        if (fsm.getState() == &state2) transitioned = true;
+        delay(5);
+    }
+    assertTrue(transitioned);
+    assertEqual(g_timer_count, 1);        // setOnRunHandler took effect
+}
+
+// A duplicate global timed transition must be rejected.
+test(APICoverage, DuplicateGlobalTimedTransition) {
+    resetCounters();
+
+    State idle("Idle", onEnterCallback);
+    State target("Target", onEnterCallback);
+    SimpleFSM fsm;
+
+    State* states[] = { &idle, &target };
+    fsm.add(states, 2);
+    fsm.setInitialState(&idle);
+
+    assertEqual((int)fsm.addGlobalTimedTransition(&target, 50), (int)FSMError::OK);
+    // Identical global timed transition — must be rejected, not duplicated.
+    assertEqual((int)fsm.addGlobalTimedTransition(&target, 50), (int)FSMError::INVALID_PARAMETER);
+    assertEqual(fsm.getTimedTransitionCount(), 1);
+}
+
+// millis() rollover: isTimeForRun() must use wrap-safe subtraction so the run
+// loop keeps firing correctly across the ~49-day unsigned-long wraparound.
+test(APICoverage, RunTimingHandlesMillisRollover) {
+    resetCounters();
+
+    State state1("State1", onEnterCallback);
+    SimpleFSM fsm;
+    State* states[] = { &state1 };
+    fsm.add(states, 1);
+    fsm.setInitialState(&state1);
+
+    const unsigned long MAX = (unsigned long)-1;
+
+    // last_run near the max; interval not yet elapsed across the wrap.
+    FSMTestHelper::setLastRun(fsm, MAX - 5);
+    // now = MAX - 2 → only 3 elapsed, interval 10 → must be false.
+    assertFalse(FSMTestHelper::isTimeForRun(fsm, MAX - 2, 10));
+
+    // Enough time has elapsed across the wrap → must be true.
+    // now = 2 → elapsed = 8 (mod 2^width), interval 3 → must be true.
+    assertTrue(FSMTestHelper::isTimeForRun(fsm, 2, 3));
+
+    // Sanity: normal (non-wrapping) case still works.
+    FSMTestHelper::setLastRun(fsm, 1000);
+    assertFalse(FSMTestHelper::isTimeForRun(fsm, 1005, 10));
+    assertTrue(FSMTestHelper::isTimeForRun(fsm, 1015, 10));
+}
+
+//////////////////////////////////////////////////////////////////
 // Setup and Loop
 //////////////////////////////////////////////////////////////////
 

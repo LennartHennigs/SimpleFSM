@@ -4,7 +4,7 @@ This file provides specific guidance for AI assistants (especially Claude Code) 
 
 ## Test Suite Overview
 
-The SimpleFSM test suite is organized into 7 comprehensive phases covering all aspects of the finite state machine library:
+The SimpleFSM test suite is organized into 9 comprehensive phases covering all aspects of the finite state machine library:
 
 1. **StateManagement** - State creation, callbacks, properties, and lifecycle
 2. **TransitionTests** - Event-driven transitions, guards, and validation  
@@ -13,6 +13,8 @@ The SimpleFSM test suite is organized into 7 comprehensive phases covering all a
 5. **ErrorHandling** - Error codes, parameter validation, and edge cases
 6. **AdvancedFeatures** - FSM reset, DOT generation, state tracking, and handlers
 7. **Integration** - Real-world scenarios like traffic lights and complex state machines
+8. **NamedTransitions** - String-based (name) transitions: DOT generation, duplicate detection, and unresolved-name safety
+9. **APICoverage** - Previously untested public surface: parameterized constructor, `getLastTransition()`, `lastTransitioned()`, setters, accessors, and `millis()`-rollover run timing
 
 ## Testing Framework & Environment
 
@@ -252,7 +254,7 @@ pio test -e M5Stack_ESP32_test -v # Real ESP32 hardware
 ```
 
 ### Expected Results
-- **All 25 tests should PASS**
+- **All 41 tests should PASS**
 - **No segmentation faults**
 - **No memory leaks**
 - **Total runtime: ~5-10 seconds for native tests**

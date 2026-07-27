@@ -196,6 +196,7 @@ State brewing("Brewing", onEnterBrewing);
 State ready  ("Ready",   onEnterReady);
 ```
 
+* Make sure every referenced name matches a `State` you `add()` — a name that resolves to nothing leaves that transition inert (it never fires), it does **not** become a global transition.
 * See [NamedStateTransitions.ino](https://github.com/LennartHennigs/SimpleFSM/blob/main/examples/NamedStateTransitions/NamedStateTransitions.ino) for a complete example
 
 ### Timed Transitions

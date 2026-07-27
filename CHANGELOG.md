@@ -3,6 +3,17 @@
 ## Unreleased
 
 - none
+
+## 2.0.1 - 2026-07-27
+
+- Fixed bugs in name-based (string) transitions
+  - `getDotDefinition()` no longer crashes on a NULL pointer when the FSM contains name-based transitions that have not been resolved yet; the DOT graph now shows the declared state names instead of mislabelling them `GLOBAL`.
+  - Two distinct name-based transitions that share the same event id (or interval) are no longer wrongly treated as duplicates and silently dropped; duplicate detection now also compares the declared state names.
+  - An unknown/typo'd source-state name no longer turns a transition into an accidental global transition that fires from any state; unresolved named transitions now stay inert.
+- Fixed `run()` timing across the `millis()` rollover
+  - `isTimeForRun()` now uses wrap-safe subtraction, so the run loop keeps firing correctly around the ~49-day `unsigned long` wraparound instead of stalling or firing early.
+- Expanded test coverage
+  - Added a `NamedTransitions` suite (DOT generation, duplicate detection, unresolved-name safety) and an `APICoverage` suite covering the parameterized constructor, `getLastTransition()`, `lastTransitioned()`, State/Transition/TimedTransition setters, `getEventID()` / `getInterval()`, duplicate global timed-transition rejection, and `millis()`-rollover run timing.
   
 ## 2.0.0 - 2026-05-09
 

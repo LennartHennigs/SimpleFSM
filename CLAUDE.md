@@ -49,7 +49,7 @@ arduino-cli core install esp8266:esp8266 esp32:esp32 arduino:avr
 
 ### Tests (`test/SimpleFSMTest/SimpleFSMTest.ino`)
 
-7 test suites using AUnit + EpoxyDuino. See `test/CLAUDE.md` for test-specific rules.
+9 test suites using AUnit + EpoxyDuino. See `test/CLAUDE.md` for test-specific rules.
 
 ### Key Design Points
 

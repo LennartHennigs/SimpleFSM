@@ -118,7 +118,6 @@ void SimpleFSM::reset() {
   last_run = TIMESTAMP_RESET_VALUE;
   last_transition = TIMESTAMP_RESET_VALUE;
   last_error = FSMError::OK;  // Reset error state
-  setInitialState(initial_state);
   current_state = NULL;
   prev_state = NULL;
 
@@ -139,9 +138,12 @@ bool SimpleFSM::trigger(int event_id) {
   if (!is_initialized) initFSM();
   // Find the transition with the current state and given event
   for (int i = 0; i < num_standard; i++) {
-    // Check for global transition (from == NULL) OR specific state transition
-    if ((transitions[i].from == NULL || 
-        transitions[i].from == current_state) && 
+    // A NULL 'from' is only a genuine global transition when no source name
+    // was declared. A non-empty fromStateName with a NULL pointer means the
+    // name failed to resolve; such a transition must stay inert, not global.
+    bool isGlobal = (transitions[i].from == NULL && transitions[i].fromStateName == "");
+    bool matchesState = (transitions[i].from != NULL && transitions[i].from == current_state);
+    if ((isGlobal || matchesState) &&
         transitions[i].event_id == event_id) {
       return transitionTo(&(transitions[i]));
     }
@@ -480,8 +482,13 @@ FSMError SimpleFSM::addGlobalTimedTransition(State* to, unsigned long interval, 
 
 bool SimpleFSM::isDuplicate(const TimedTransition& transition, const TimedTransition* transitionArray, int arraySize) const {
   for (int i = 0; i < arraySize; ++i) {
+    // Compare the declared state names too: string-based transitions share
+    // NULL from/to pointers until they are resolved, so pointers alone would
+    // wrongly collapse distinct named transitions into one.
     if (transitionArray[i].from == transition.from &&
         transitionArray[i].to == transition.to &&
+        transitionArray[i].fromStateName == transition.fromStateName &&
+        transitionArray[i].toStateName == transition.toStateName &&
         transitionArray[i].interval == transition.interval) {
       return true;
     }
@@ -495,6 +502,8 @@ bool SimpleFSM::isDuplicate(const Transition& transition, const Transition* tran
   for (int i = 0; i < arraySize; ++i) {
     if (transitionArray[i].from == transition.from &&
         transitionArray[i].to == transition.to &&
+        transitionArray[i].fromStateName == transition.fromStateName &&
+        transitionArray[i].toStateName == transition.toStateName &&
         transitionArray[i].event_id == transition.event_id) {
       return true;
     }
@@ -551,7 +560,9 @@ void SimpleFSM::run(int interval /* = DEFAULT_RUN_INTERVAL_MS */, CallbackFuncti
 /////////////////////////////////////////////////////////////////
 
 bool SimpleFSM::isTimeForRun(unsigned long now, int interval) {
-  return now >= last_run + interval;
+  // Wrap-safe: subtracting unsigned timestamps stays correct across the
+  // ~49-day millis() rollover, whereas (last_run + interval) can overflow.
+  return (now - last_run) >= (unsigned long)interval;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -560,6 +571,9 @@ void SimpleFSM::handleTimedEvents(unsigned long now) {
   for (int i = 0; i < num_timed; i++) {
     // Check for global timed transition (from == NULL) OR specific state transition
     if (timed[i].from != NULL && timed[i].from != current_state) continue;
+    // A NULL 'from' with a declared source name is an unresolved name, not a
+    // global transition — skip it so a typo does not fire from every state.
+    if (timed[i].from == NULL && timed[i].fromStateName != "") continue;
     
     // For global timed transitions (from == NULL), they apply to all states
     // For specific transitions, they only apply when from == current_state
@@ -684,15 +698,19 @@ String SimpleFSM::getDOTHeader() {
 /////////////////////////////////////////////////////////////////
 
 void SimpleFSM::addDOTTransition(Transition& t) {
-  String fromName = (t.from != NULL) ? t.from->getName() : "GLOBAL";
-  dot_definition = dot_definition + getDOTTransition(fromName, t.to->getName(), t.getName(), "ID=" + String(t.event_id));
+  // Names may not be resolved to pointers yet (string-based transitions),
+  // so fall back to the declared state names before dereferencing.
+  String fromName = (t.from != NULL) ? t.from->getName() : (t.fromStateName != "" ? t.fromStateName : "GLOBAL");
+  String toName = (t.to != NULL) ? t.to->getName() : t.toStateName;
+  dot_definition = dot_definition + getDOTTransition(fromName, toName, t.getName(), "ID=" + String(t.event_id));
 }
 
 /////////////////////////////////////////////////////////////////
 
 void SimpleFSM::addDOTTransition(TimedTransition& t) {
-  String fromName = (t.from != NULL) ? t.from->getName() : "GLOBAL";
-  dot_definition = dot_definition + getDOTTransition(fromName, t.to->getName(), t.getName(), String(t.getInterval()) + "ms");
+  String fromName = (t.from != NULL) ? t.from->getName() : (t.fromStateName != "" ? t.fromStateName : "GLOBAL");
+  String toName = (t.to != NULL) ? t.to->getName() : t.toStateName;
+  dot_definition = dot_definition + getDOTTransition(fromName, toName, t.getName(), String(t.getInterval()) + "ms");
 }
 
 /////////////////////////////////////////////////////////////////
