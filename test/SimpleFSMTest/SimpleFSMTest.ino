@@ -31,6 +31,19 @@ void onTimerCallback() { g_timer_count++; }
 void onFinishedCallback() { g_finished_count++; }
 bool guardCondition() { g_guard_count++; return g_guard_result; }
 
+// Simulates a concurrent/reentrant run() call landing mid on_enter() (e.g. a second
+// core, task, or ISR calling fsm.run() while on_enter() is still executing).
+static SimpleFSM* g_reentrant_fsm = NULL;
+static int g_state_during_enter = -1;
+
+void onEnterReentrantCallback() {
+    g_enter_count++;
+    if (g_reentrant_fsm != NULL) {
+        g_reentrant_fsm->run(0);
+        g_state_during_enter = g_state_count;
+    }
+}
+
 // Reset all counters before each test
 void resetCounters() {
     g_enter_count = 0;
@@ -90,6 +103,27 @@ test(StateManagement, StateCallbacks) {
     fsm.trigger(1);
     assertEqual(g_exit_count, 1); // state1 on_exit called
     assertEqual(g_enter_count, 2); // state2 on_enter called (now 2 total)
+}
+
+test(StateManagement, OnStateNotCalledDuringOnEnter) {
+    resetCounters();
+    g_state_during_enter = -1;
+
+    State state1("State1", onEnterCallback);
+    State state2("State2", onEnterReentrantCallback, onStateCallback);
+    SimpleFSM fsm(&state1);
+    g_reentrant_fsm = &fsm;
+
+    State* states[] = { &state1, &state2 };
+    fsm.add(states, 2);
+    Transition transitions[] = { Transition(&state1, &state2, 1) };
+    fsm.add(transitions, 1);
+
+    fsm.run(0);              // initializes FSM, enters state1
+    fsm.trigger(1);          // transitions to state2; on_enter calls run() reentrantly
+
+    assertEqual(g_state_during_enter, 0); // on_state must NOT have fired during on_enter
+    g_reentrant_fsm = NULL;
 }
 
 test(StateManagement, FinalState) {

@@ -116,6 +116,10 @@ class SimpleFSM {
     State* prev_state = NULL;
     CallbackFunction on_transition_cb = NULL;
     CallbackFunction finished_cb = NULL;
+    // Guards on_state() against firing on a state whose on_enter() hasn't
+    // finished yet if run()/trigger() are reentered concurrently (another
+    // core, task, or ISR calling into this FSM instance during on_enter()).
+    volatile bool in_transition = false;
 
     String dot_definition = "";
 

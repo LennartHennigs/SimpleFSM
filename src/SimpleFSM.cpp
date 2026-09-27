@@ -551,8 +551,8 @@ void SimpleFSM::run(int interval /* = DEFAULT_RUN_INTERVAL_MS */, CallbackFuncti
   last_run = now;
   // go through the timed events
   handleTimedEvents(now);
-  // trigger the on_state event
-  if (current_state->on_state != NULL) current_state->on_state();
+  // trigger the on_state event (skip while a transition's on_enter() is still running)
+  if (!in_transition && current_state->on_state != NULL) current_state->on_state();
   // trigger the regular tick event
   if (tick_cb != NULL) tick_cb();
 }
@@ -620,10 +620,12 @@ bool SimpleFSM::initFSM() {
 
 bool SimpleFSM::changeToState(State* s, unsigned long now) {
   if (s == NULL) return false;
+  in_transition = true;
   // set the new state
   prev_state = current_state;
   current_state = s;
   if (s->on_enter != NULL) s->on_enter();
+  in_transition = false;
   // save the time
   last_run = now;
   last_transition = now;
